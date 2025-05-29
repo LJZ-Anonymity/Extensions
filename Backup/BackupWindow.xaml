@@ -18,8 +18,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/QuickerExtension;component/Resource/CheckBoxStyle.xaml"/>
-                <ResourceDictionary Source="/QuickerExtension;component/Resource/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="/Quicker;component/Resources/Styles/CheckBoxStyle.xaml"/>
+                <ResourceDictionary Source="/Quicker;component/Resources/Styles/ButtonStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>

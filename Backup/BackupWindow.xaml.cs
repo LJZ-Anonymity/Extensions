@@ -1,44 +1,66 @@
-﻿using System.Windows.Controls.Primitives;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Quicker.Interface;
+using Quicker.Managers;
 using System.Windows;
 using System.IO;
 
 namespace QuickerExtension.Backup
 {
-    public partial class BackupWindow : Window
+    public partial class BackupWindow : Window, IExtensionModule
     {
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
         private readonly FilesDatabase db = new(); // 文件数据库
 
-        // 调用文件复制库
+        // 使用 DllImport 特性来声明外部函数，并手动指定字符串的封送方式
         [DllImport("FileCopy.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void CopyFiles(string sourcePaths, string targetPath, string style, bool cleanTargetFolder);
+        public static extern void CopyFiles(
+            [MarshalAs(UnmanagedType.LPWStr)] string sourcePaths,
+            [MarshalAs(UnmanagedType.LPWStr)] string targetPath,
+            [MarshalAs(UnmanagedType.LPWStr)] string style,
+            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder
+        );
+
+        // 实现 IExtensionModule 接口的 Initialize 方法
+        public void Initialize()
+        {
+            this.ShowWindow(); // 在初始化时直接显示窗口
+        }
+
+        // 实现 IExtensionModule 接口的 ShowWindow 方法
+        public void ShowWindow()
+        {
+            this.Show(); // 显示窗口
+            this.Activate(); // 激活窗口
+        }
 
         public BackupWindow()
         {
             InitializeComponent();
         }
-        
+
         // 加载要备份的文件列表
         private void BackupWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            Refresh();
+            Refresh(); // 刷新文件列表
         }
 
         // 刷新文件列表
         public void Refresh()
         {
-            MainStackPanel.Children.Clear();
-            var files = db.GetAllFileData();
+            MainStackPanel.Children.Clear(); // 清空窗口内容
+            var files = db.GetAllFileData(); // 获取所有文件数据
             foreach (var file in files)
             {
-                CreateFileItem(file);
+                CreateFileItem(file); // 创建文件项
             }
         }
 
-        // 创建文件项
+        /// <summary>
+        /// 创建文件项
+        /// </summary>
+        /// <param name="file"> 文件数据 </param>
         private void CreateFileItem(FilesDatabase.FileData file)
         {
             Grid grid = new()
@@ -48,7 +70,7 @@ namespace QuickerExtension.Backup
             };
             MainStackPanel.Children.Add(grid); // 添加文件项
 
-            System.Windows.Controls.CheckBox checkbox = new()
+            CheckBox checkbox = new()
             {
                 Tag = file.FileID,
                 Content = file.FileName,
@@ -56,26 +78,26 @@ namespace QuickerExtension.Backup
             };
             grid.Children.Add(checkbox); // 添加复选框
 
-            System.Windows.Controls.Button deleteButton = new()
+            Button deleteButton = new()
             {
                 Width = 64,
                 Content = "删除",
                 Tag = file.FileID,
                 Margin = new Thickness(497, 0, 0, 0),
                 Style = (Style)FindResource("WhiteButton"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left
             };
             deleteButton.Click += DeleteButton_Click; // 绑定删除按钮事件
             grid.Children.Add(deleteButton); // 添加删除按钮
 
-            System.Windows.Controls.Button editButton = new()
+            Button editButton = new()
             {
                 Width = 64,
                 Content = "编辑",
                 Tag = file.FileID,
                 Margin = new Thickness(428, 0, 0, 0),
                 Style = (Style)FindResource("WhiteButton"),
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left
             };
             editButton.Click += EditButton_Click; // 绑定编辑按钮事件
             grid.Children.Add(editButton); // 添加编辑按钮
@@ -84,7 +106,7 @@ namespace QuickerExtension.Backup
         // 备份选中的文件
         private async void BackupButton_Click(object sender, RoutedEventArgs e)
         {
-            var checkboxes = FindVisualChildren<System.Windows.Controls.CheckBox>(scrollViewer); // 获取所有复选框
+            var checkboxes = FindVisualChildren<CheckBox>(scrollViewer); // 获取所有复选框
             selectedFiles.Clear(); // 清空选中的文件
             foreach (var checkbox in checkboxes) // 遍历所有复选框
             {
@@ -99,7 +121,8 @@ namespace QuickerExtension.Backup
 
             if (selectedFiles.Count == 0)
             {
-                System.Windows.MessageBox.Show("没有选中任何文件！", "提示", MessageBoxButton.OK, MessageBoxImage.Information); // 提示没有选中文件
+                using var toast = new ToastManager(); // 创建 Toast 管理器
+                toast.Show("没有选中任何文件！", "Error"); // 显示 Toast 通知
                 return; // 退出
             }
 
@@ -113,13 +136,14 @@ namespace QuickerExtension.Backup
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"备份失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error); // 显示备份失败信息
+                using var toast = new ToastManager(); // 创建 Toast 管理器
+                toast.Show($"备份失败: {ex.Message}", "Error"); // 显示 Toast 通知
             }
             finally
             {
                 TipLabel.Content = "备份完成！"; // 显示备份完成信息
                 BackupButton.IsEnabled = true; // 启用备份按钮
-                if (ExitAfterBackupCheckBox.IsChecked == true) System.Windows.Application.Current.Shutdown(); // 退出程序
+                if (ExitAfterBackupCheckBox.IsChecked == true) Application.Current.Shutdown(); // 退出程序
                 WindowState = WindowState.Normal; // 窗口恢复
             }
         }
@@ -138,7 +162,8 @@ namespace QuickerExtension.Backup
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        System.Windows.MessageBox.Show($"备份文件 {file.FileName} 失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error); // 显示备份失败信息
+                        using var toast = new ToastManager(); // 创建 Toast 管理器
+                        toast.Show($"备份文件 {file.FileName} 失败: {ex.Message}", "Error"); // 显示 Toast 通知
                     });
                 }
             }
@@ -147,7 +172,7 @@ namespace QuickerExtension.Backup
         // 删除文件
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (System.Windows.Controls.Button)sender; // 获取按钮
+            var button = (Button)sender; // 获取按钮
             int fileID = (int)button.Tag; // 获取文件ID
             db.DeleteFileData(fileID); // 删除文件数据
             MainStackPanel.Children.Remove(button.Parent as Grid); // 删除文件项
@@ -156,7 +181,7 @@ namespace QuickerExtension.Backup
         // 编辑文件
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = (System.Windows.Controls.Button)sender; // 获取按钮
+            var button = (Button)sender; // 获取按钮
             int fileID = (int)button.Tag; // 获取文件ID
             AddBackupItemWindow addwindow = new(fileID.ToString()); // 创建编辑窗口
             addwindow.ShowDialog(); // 显示窗口

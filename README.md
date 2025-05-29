@@ -1,3 +1,3 @@
 # QuickerExtension
 
-×ÔÖÆ Quicker Ó¦ÓÃµÄÍØÕ¹
+QUicker çš„æ‰©å±•

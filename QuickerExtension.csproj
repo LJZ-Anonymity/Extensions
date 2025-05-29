@@ -10,6 +10,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +32,10 @@
 
   <ItemGroup>
     <Folder Include="Connector\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Quicker\Quicker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
