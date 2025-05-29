@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+﻿using System.Windows.Forms;
 using System.Windows;
 
 namespace QuickerExtension.Backup
@@ -67,7 +67,7 @@ namespace QuickerExtension.Backup
                 db.UpdateFileData(int.Parse(style), SourceLocationTextBox.Text, TargetLocationTextBox.Text, TitleTextBox.Text, backupData.Style, deleteSource); //更新备份信息
             }
 
-            BackupWindow mainWindow = Application.Current.Windows.OfType<BackupWindow>().FirstOrDefault(); //获取主窗口
+            BackupWindow mainWindow = System.Windows.Application.Current.Windows.OfType<BackupWindow>().FirstOrDefault(); //获取主窗口
             mainWindow?.Refresh(); //刷新主窗口
             Close(); //关闭窗口
         }
@@ -98,10 +98,11 @@ namespace QuickerExtension.Backup
         }
 
         // 选择源文件
+        // 选择源文件
         private void SelectFiles()
         {
-            var fileDialog = new OpenFileDialog { Multiselect = true };
-            if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            var fileDialog = new Microsoft.Win32.OpenFileDialog { Multiselect = true };
+            if (fileDialog.ShowDialog() == true) // 检查返回值是否为 true
             {
                 foreach (string path in fileDialog.FileNames)
                 {
@@ -109,6 +110,7 @@ namespace QuickerExtension.Backup
                 }
             }
         }
+
 
         // 选择源文件夹
         private void SelectFolder()

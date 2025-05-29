@@ -141,9 +141,11 @@ namespace QuickerExtension.Backup
             }
             finally
             {
+                using var toast = new ToastManager(); // 创建 Toast 管理器
+                toast.Show("备份完成！", "Success"); // 显示 Toast 通知
                 TipLabel.Content = "备份完成！"; // 显示备份完成信息
                 BackupButton.IsEnabled = true; // 启用备份按钮
-                if (ExitAfterBackupCheckBox.IsChecked == true) Application.Current.Shutdown(); // 退出程序
+                if (ExitAfterBackupCheckBox.IsChecked == true) this.Close(); // 关闭窗口
                 WindowState = WindowState.Normal; // 窗口恢复
             }
         }
