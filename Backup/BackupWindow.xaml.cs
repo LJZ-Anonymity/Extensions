@@ -20,7 +20,7 @@ namespace QuickerExtension.Backup
             [MarshalAs(UnmanagedType.LPWStr)] string targetPath,
             [MarshalAs(UnmanagedType.LPWStr)] string style,
             [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder
-        );
+        ); // 复制文件
 
         // 实现 IExtensionModule 接口的 Initialize 方法
         public void Initialize()
