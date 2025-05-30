@@ -8,34 +8,38 @@ namespace Backup
         private readonly FilesDatabase db= new(); //数据库
         private readonly string style; //窗口类型
 
+        /// <summary>
+        /// 添加备份项目窗口
+        /// </summary>
+        /// <param name="style">窗口类型</param>
         public AddBackupItemWindow(string style)
         {
-            InitializeComponent();
+            InitializeComponent(); //初始化窗口
             this.style = style; //设置窗口类型
         }
 
         // 加载窗口数据
         private void AddWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (style == "File")
+            switch (style) // 根据窗口类型选择不同的标题和描述
             {
-                Title = "添加要备份的文件"; //添加要备份的文件
-                DescriptionLabel.Content = "源文件地址"; //源文件地址
-            }
-            else if (style == "Folder")
-            {
-                Title = "添加要备份的文件夹"; //添加要备份的文件夹
-                DescriptionLabel.Content = "源文件夹地址"; //源文件夹地址
-            }
-            else
-            {
-                Title = "添加备份信息"; //添加备份信息
-                var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
-                DescriptionLabel.Content = backupData.Style == "File" ? "源文件地址" : "源文件夹地址"; //备份文件类型
-                TitleTextBox.Text = backupData.FileName; //备份文件名
-                SourceLocationTextBox.Text = backupData.SourcePath; //源文件或文件夹地址
-                TargetLocationTextBox.Text = backupData.TargetPath; //目标文件夹地址
-                DeleteTargetFolderCheckBox.IsChecked = backupData.CleanTargetFloder; //是否删除目标文件夹
+                case "File":
+                    Title = "添加要备份的文件"; //添加要备份的文件
+                    DescriptionLabel.Content = "源文件地址"; //源文件地址
+                    break;
+                case "Folder":
+                    Title = "添加要备份的文件夹"; //添加要备份的文件夹
+                    DescriptionLabel.Content = "源文件夹地址"; //源文件夹地址
+                    break;
+                default:
+                    Title = "修改备份信息"; //修改备份信息
+                    var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
+                    DescriptionLabel.Content = backupData.Style == "File" ? "源文件地址" : "源文件夹地址"; //备份文件类型
+                    TitleTextBox.Text = backupData.FileName; //备份文件名
+                    SourceLocationTextBox.Text = backupData.SourcePath; //源文件或文件夹地址
+                    TargetLocationTextBox.Text = backupData.TargetPath; //目标文件夹地址
+                    DeleteTargetFolderCheckBox.IsChecked = backupData.CleanTargetFloder; //是否删除目标文件夹
+                    break;
             }
         }
 
@@ -77,27 +81,26 @@ namespace Backup
         {
             if (style == "File")
             {
-                SelectFiles();
+                SelectFiles(); //选择源文件
             }
             else if (style == "Folder")
             {
-                SelectFolder();
+                SelectFolder(); //选择源文件夹
             }
             else
             {
-                var backupData = db.GetFileData(int.Parse(style));
+                var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
                 if (backupData.Style == "File")
                 {
-                    SelectFiles();
+                    SelectFiles(); //选择源文件
                 }
                 else if (backupData.Style == "Folder")
                 {
-                    SelectFolder();
+                    SelectFolder(); //选择源文件夹
                 }
             }
         }
 
-        // 选择源文件
         // 选择源文件
         private void SelectFiles()
         {
@@ -106,7 +109,7 @@ namespace Backup
             {
                 foreach (string path in fileDialog.FileNames)
                 {
-                    SourceLocationTextBox.Text += path + "\n";
+                    SourceLocationTextBox.Text += path + "\n"; // 添加文件路径
                 }
             }
         }
@@ -115,10 +118,10 @@ namespace Backup
         // 选择源文件夹
         private void SelectFolder()
         {
-            var folderDialog = new FolderBrowserDialog { ShowNewFolderButton = true };
+            var folderDialog = new FolderBrowserDialog { ShowNewFolderButton = true }; //创建文件夹对话框
             if (folderDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                SourceLocationTextBox.Text += folderDialog.SelectedPath + "\n";
+                SourceLocationTextBox.Text += folderDialog.SelectedPath + "\n"; //选择文件夹路径
             }
         }
 

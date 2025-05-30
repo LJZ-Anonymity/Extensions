@@ -7,10 +7,10 @@ namespace Backup
     {
         // 数据库连接字符串
         private const string Backupdb = "Data Source=C:\\Users\\LENOVO\\AppData\\Roaming\\Anonymity\\Quicker\\Extensions\\Backup\\Backup.db;Pooling=true;Max Pool Size=100;Journal Mode=Wal;";
+        private const string dbFolder = @"C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions\Backup"; // 数据库文件夹路径
 
         public FilesDatabase()
         {
-            string dbFolder = @"C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions\Backup"; // 获取数据库文件夹路径
             if (!Directory.Exists(dbFolder)) // 如果数据库文件夹不存在，则创建
                 Directory.CreateDirectory(dbFolder); // 创建数据库文件夹
             string dbFilePath = Path.Combine(dbFolder, "Backup.db"); // 获取数据库文件路径
@@ -24,19 +24,8 @@ namespace Backup
         // 初始化数据库
         private static void InitializeDatabase()
         {
-            using var connection = new SQLiteConnection(Backupdb); // 创建数据库连接
-            connection.Open(); // 打开数据库连接
-            string createTableQuery = @"
-            CREATE TABLE IF NOT EXISTS [FilesData]
-            (
-                FileID INTEGER PRIMARY KEY AUTOINCREMENT,
-                FileName TEXT,
-                SourcePath TEXT,
-                TargetPath TEXT,
-                Style TEXT,
-                CleanTargetFloder BOOLEAN
-            );"; // 创建表语句
-            using var command = new SQLiteCommand(createTableQuery, connection); // 创建命令对象
+            using var connection = OpenConnection(); // 打开数据库连接
+            using var command = new SQLiteCommand(SQLStatements.CreateTable, connection); // 创建命令对象
             command.ExecuteNonQuery(); // 执行创建表语句
         }
 
@@ -51,26 +40,13 @@ namespace Backup
         public void AddFileData(string sourcePath, string targetPath, string fileName, string style, bool cleanTargetFloder)
         {
             using var connection = OpenConnection(); // 打开数据库连接
-            using var transaction = connection.BeginTransaction(); // 开启事务
-            try
-            {
-                string insertQuery = @"
-                INSERT INTO [FilesData] (SourcePath, TargetPath, FileName, Style, CleanTargetFloder)
-                VALUES (@SourcePath, @TargetPath, @FileName, @Style, @CleanTargetFloder);"; // 插入语句
-                using var command = new SQLiteCommand(insertQuery, connection); // 创建命令对象
-                command.Transaction = transaction; // 设置事务
-                command.Parameters.AddWithValue("@SourcePath", sourcePath); // 添加参数
-                command.Parameters.AddWithValue("@TargetPath", targetPath); // 添加参数
-                command.Parameters.AddWithValue("@FileName", fileName); // 添加参数
-                command.Parameters.AddWithValue("@Style", style); // 添加参数
-                command.Parameters.AddWithValue("@CleanTargetFloder", cleanTargetFloder); // 添加参数
-                command.ExecuteNonQuery(); // 执行插入语句
-                transaction.Commit(); // 提交事务
-            }
-            catch
-            {
-                transaction.Rollback(); // 回滚事务
-            }
+            using var command = new SQLiteCommand(SQLStatements.InsertFileData, connection); // 创建命令对象
+            command.Parameters.AddWithValue("@SourcePath", sourcePath); // 添加参数
+            command.Parameters.AddWithValue("@TargetPath", targetPath); // 添加参数
+            command.Parameters.AddWithValue("@FileName", fileName); // 添加参数
+            command.Parameters.AddWithValue("@Style", style); // 添加参数
+            command.Parameters.AddWithValue("@CleanTargetFloder", cleanTargetFloder); // 添加参数
+            command.ExecuteNonQuery(); // 执行插入语句
         }
 
         /// <summary>
@@ -80,23 +56,12 @@ namespace Backup
         public List<FileData> GetAllFileData()
         {
             using var connection = OpenConnection(); // 打开数据库连接
-            string selectQuery = @"
-            SELECT * FROM [FilesData]"; // 查询语句
-            using var command = new SQLiteCommand(selectQuery, connection); // 创建命令对象
+            using var command = new SQLiteCommand(SQLStatements.SelectAllFileData, connection); // 创建命令对象
             using var reader = command.ExecuteReader(); // 执行查询并返回结果集
             var fileDataList = new List<FileData>(); // 定义文件数据列表
             while (reader.Read())
             {
-                var fileData = new FileData
-                {
-                    FileID = reader.GetInt32(0),
-                    FileName = reader.GetString(1),
-                    SourcePath = reader.GetString(2),
-                    TargetPath = reader.GetString(3),
-                    Style = reader.GetString(4),
-                    CleanTargetFloder = reader.GetBoolean(5)
-                }; // 创建文件数据对象
-                fileDataList.Add(fileData); // 添加文件数据
+                fileDataList.Add(FileDataHelper.FromReader(reader)); // 添加文件数据
             }
             return fileDataList; // 返回所有文件数据
         }
@@ -109,24 +74,12 @@ namespace Backup
         public FileData GetFileData(int fileID)
         {
             using var connection = OpenConnection(); // 打开数据库连接
-            string selectQuery = @"
-            SELECT * FROM [FilesData]
-            WHERE FileID = @FileID"; // 查询语句
-            using var command = new SQLiteCommand(selectQuery, connection); // 创建命令对象
+            using var command = new SQLiteCommand(SQLStatements.SelectFileDataById, connection); // 创建命令对象
             command.Parameters.AddWithValue("@FileID", fileID); // 添加参数
             using var reader = command.ExecuteReader(); // 执行查询并返回结果集
             while (reader.Read())
             {
-                var fileData = new FileData
-                {
-                    FileID = reader.GetInt32(0),
-                    FileName = reader.GetString(1),
-                    SourcePath = reader.GetString(2),
-                    TargetPath = reader.GetString(3),
-                    Style = reader.GetString(4),
-                    CleanTargetFloder = reader.GetBoolean(5)
-                }; // 创建文件数据对象
-                return fileData; // 返回文件数据
+                return FileDataHelper.FromReader(reader); // 从SQLiteDataReader中读取文件数据
             }
             return null; // 文件不存在
         }
@@ -142,11 +95,7 @@ namespace Backup
         public void UpdateFileData(int fileID, string sourcePath, string targetPath, string fileName, string style, bool cleanTargetFloder)
         {
             using var connection = OpenConnection(); // 打开数据库连接
-            string updateQuery = @"
-            UPDATE [FilesData]
-            SET SourcePath = @SourcePath, TargetPath = @TargetPath, FileName = @FileName, Style = @Style, cleanTargetFloder = @CleanTargetFloder
-            WHERE FileID = @FileID"; // 更新语句
-            using var command = new SQLiteCommand(updateQuery, connection); // 创建命令对象
+            using var command = new SQLiteCommand(SQLStatements.UpdateFileData, connection); // 创建命令对象
             command.Parameters.AddWithValue("@FileID", fileID); // 添加参数
             command.Parameters.AddWithValue("@SourcePath", sourcePath); // 添加参数
             command.Parameters.AddWithValue("@TargetPath", targetPath); // 添加参数
@@ -163,10 +112,7 @@ namespace Backup
         public void DeleteFileData(int fileID)
         {
             using var connection = OpenConnection(); // 打开数据库连接
-            string deleteQuery = @"
-            DELETE FROM [FilesData]
-            WHERE FileID = @FileID"; // 删除语句
-            using var command = new SQLiteCommand(deleteQuery, connection); // 创建命令对象
+            using var command = new SQLiteCommand(SQLStatements.DeleteFileData, connection); // 创建命令对象
             command.Parameters.AddWithValue("@FileID", fileID); // 添加参数
             command.ExecuteNonQuery(); // 执行删除语句
         }
@@ -182,6 +128,35 @@ namespace Backup
             return connection; // 返回数据库连接
         }
 
+        // SQL语句类
+        public class SQLStatements
+        {
+            public const string CreateTable = @"
+            CREATE TABLE IF NOT EXISTS [FilesData]
+            (
+                FileID INTEGER PRIMARY KEY AUTOINCREMENT,
+                FileName TEXT,
+                SourcePath TEXT,
+                TargetPath TEXT,
+                Style TEXT,
+                CleanTargetFloder BOOLEAN
+            );"; // 创建表语句
+            public const string InsertFileData = @"
+            INSERT INTO [FilesData] (SourcePath, TargetPath, FileName, Style, CleanTargetFloder)
+            VALUES (@SourcePath, @TargetPath, @FileName, @Style, @CleanTargetFloder);"; // 插入语句
+            public const string SelectAllFileData = @"
+            SELECT * FROM [FilesData]"; // 查询所有文件数据语句
+            public const string SelectFileDataById = @"
+            SELECT * FROM [FilesData] WHERE FileID = @FileID"; // 查询文件数据语句
+            public const string UpdateFileData = @"
+            UPDATE [FilesData]
+            SET SourcePath = @SourcePath, TargetPath = @TargetPath, FileName = @FileName, Style = @Style, CleanTargetFloder = @CleanTargetFloder
+            WHERE FileID = @FileID"; // 更新语句
+            public const string DeleteFileData = @"
+            DELETE FROM [FilesData] WHERE FileID = @FileID"; // 删除语句
+        }
+
+        // 文件数据类
         public class FileData
         {
             public int FileID { get; set; } // 主键
@@ -190,6 +165,24 @@ namespace Backup
             public required string TargetPath { get; set; } // 目标路径
             public required string Style { get; set; } // 备份方式
             public bool CleanTargetFloder { get; set; } // 是否清空目标文件夹
+        }
+
+        // 文件数据帮助类
+        public static class FileDataHelper
+        {
+            // 从SQLiteDataReader中读取文件数据
+            public static FileData FromReader(SQLiteDataReader reader)
+            {
+                return new FileData
+                {
+                    FileID = reader.GetInt32(0),
+                    FileName = reader.GetString(1),
+                    SourcePath = reader.GetString(2),
+                    TargetPath = reader.GetString(3),
+                    Style = reader.GetString(4),
+                    CleanTargetFloder = reader.GetBoolean(5)
+                }; // 从SQLiteDataReader中读取文件数据
+            }
         }
     }
 }

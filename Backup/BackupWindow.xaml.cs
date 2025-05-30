@@ -5,40 +5,40 @@ using Quicker.Interface;
 using Quicker.Managers;
 using System.Windows;
 using System.IO;
-using Backup;
 
 namespace Backup
 {
     public partial class BackupWindow : Window, IExtensionModule
     {
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
+        private const string DLL_PATH = "FileCopy/FileCopy.dll"; // 文件复制DLL路径
         private readonly FilesDatabase db = new(); // 文件数据库
 
         // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
-        [LibraryImport("FileCopy/FileCopy.dll")]
+        [LibraryImport(DLL_PATH)]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         private static partial void CopyFiles(
             [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
             [MarshalAs(UnmanagedType.LPStr)] string targetPath,
             [MarshalAs(UnmanagedType.LPStr)] string style,
-            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 外部函数声明
+            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
 
         // 实现 IExtensionModule 接口的 Initialize 方法
         public void Initialize()
         {
-            this.ShowWindow(); // 在初始化时直接显示窗口
+            ShowWindow(); // 显示窗口
         }
 
         // 实现 IExtensionModule 接口的 ShowWindow 方法
         public void ShowWindow()
         {
-            this.Show(); // 显示窗口
-            this.Activate(); // 激活窗口
+            Show(); // 显示窗口
+            Activate(); // 激活窗口
         }
 
         public BackupWindow()
         {
-            InitializeComponent();
+            InitializeComponent(); // 初始化组件
         }
 
         // 加载要备份的文件列表
@@ -50,7 +50,7 @@ namespace Backup
         // 刷新文件列表
         public void Refresh()
         {
-            MainStackPanel.Children.Clear(); // 清空窗口内容
+            MainStackPanel.Children.Clear(); // 清空主网格
             var files = db.GetAllFileData(); // 获取所有文件数据
             foreach (var file in files)
             {
@@ -61,94 +61,155 @@ namespace Backup
         /// <summary>
         /// 创建文件项
         /// </summary>
-        /// <param name="file"> 文件数据 </param>
+        /// <param name="file">文件数据</param>
         private void CreateFileItem(FilesDatabase.FileData file)
         {
-            Grid grid = new()
-            {
-                Height = 24,
-                Margin = new Thickness(0, 5, 0, 0)
-            };
-            MainStackPanel.Children.Add(grid); // 添加文件项
+            // 创建主网格
+            var grid = CreateGridForItem(); // 创建主网格
+            MainStackPanel.Children.Add(grid); // 添加主网格
 
-            CheckBox checkbox = new()
-            {
-                Tag = file.FileID,
-                Content = file.FileName,
-                Margin = new Thickness(10, 0, 158, 0)
-            };
+            // 添加复选框
+            var checkbox = CreateCheckbox(file); // 创建复选框
             grid.Children.Add(checkbox); // 添加复选框
 
-            Button deleteButton = new()
-            {
-                Width = 64,
-                Content = "删除",
-                Tag = file.FileID,
-                Margin = new Thickness(497, 0, 0, 0),
-                Style = (Style)FindResource("WhiteButton"),
-                HorizontalAlignment = HorizontalAlignment.Left
-            };
-            deleteButton.Click += DeleteButton_Click; // 绑定删除按钮事件
+            // 添加删除按钮
+            var deleteButton = CreateButton("删除", file.FileID, 497, DeleteButton_Click); // 创建删除按钮
             grid.Children.Add(deleteButton); // 添加删除按钮
 
-            Button editButton = new()
-            {
-                Width = 64,
-                Content = "编辑",
-                Tag = file.FileID,
-                Margin = new Thickness(428, 0, 0, 0),
-                Style = (Style)FindResource("WhiteButton"),
-                HorizontalAlignment = HorizontalAlignment.Left
-            };
-            editButton.Click += EditButton_Click; // 绑定编辑按钮事件
+            // 添加编辑按钮
+            var editButton = CreateButton("编辑", file.FileID, 428, EditButton_Click); // 创建编辑按钮
             grid.Children.Add(editButton); // 添加编辑按钮
+        }
+
+        /// <summary>
+        /// 创建文件项的网格
+        /// </summary>
+        private static Grid CreateGridForItem()
+        {
+            return new Grid
+            {
+                Height = 24, // 设置网格高度
+                Margin = new Thickness(0, 5, 0, 0) // 设置网格边距
+            };
+        }
+
+        /// <summary>
+        /// 创建文件项的复选框
+        /// </summary>
+        /// <param name="file">文件数据</param>
+        private static CheckBox CreateCheckbox(FilesDatabase.FileData file)
+        {
+            return new CheckBox
+            {
+                Tag = file.FileID, // 设置复选框标签
+                Content = file.FileName, // 设置复选框内容
+                Margin = new Thickness(10, 0, 158, 0) // 设置复选框边距
+            }; // 返回复选框
+        }
+
+        /// <summary>
+        /// 创建文件项的按钮
+        /// </summary>
+        /// <param name="content">按钮内容</param>
+        /// <param name="fileId">文件ID</param>
+        /// <param name="leftMargin">左侧边距</param>
+        /// <param name="clickHandler">点击事件</param>
+        private Button CreateButton(string content, int fileId, double leftMargin, RoutedEventHandler clickHandler)
+        {
+            var button = new Button
+            {
+                Width = 64, // 设置按钮宽度
+                Content = content, // 设置按钮内容
+                Tag = fileId, // 设置按钮标签
+                Margin = new Thickness(leftMargin, 0, 0, 0), // 设置按钮边距
+                Style = (Style)FindResource("WhiteButton"), // 设置按钮样式
+                HorizontalAlignment = HorizontalAlignment.Left // 设置按钮水平对齐方式
+            }; // 返回按钮
+            button.Click += clickHandler; // 添加点击事件
+            return button; // 返回按钮
         }
 
         // 备份选中的文件
         private async void BackupButton_Click(object sender, RoutedEventArgs e)
         {
-            var checkboxes = FindVisualChildren<CheckBox>(scrollViewer); // 获取所有复选框
-            selectedFiles.Clear(); // 清空选中的文件
-            foreach (var checkbox in checkboxes) // 遍历所有复选框
+            if (!CollectSelectedFiles())
             {
-                if (checkbox.IsChecked != true) continue; // 跳过未选中的文件
-                if (int.TryParse(checkbox.Tag.ToString(), out int fileID)) // 尝试获取文件ID
+                return; // 如果未收集选中的文件，则返回
+            }
+
+            PrepareForBackup(); // 准备备份操作
+
+            try
+            {
+                await BackupFilesAsync(); // 备份选中的文件
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"备份失败: {ex.Message}", "Error"); // 显示备份失败通知
+            }
+            finally
+            {
+                CompleteBackup(); // 完成备份操作
+            }
+        }
+
+        /// <summary>
+        /// 收集选中的文件
+        /// </summary>
+        /// <returns>是否收集到选中的文件</returns>
+        private bool CollectSelectedFiles()
+        {
+            var checkboxes = FindVisualChildren<CheckBox>(scrollViewer); // 查找所有复选框
+            selectedFiles.Clear(); // 清空选中的文件列表
+            foreach (var checkbox in checkboxes)
+            {
+                if (checkbox.IsChecked != true) 
+                    continue; // 如果复选框未选中，则跳过
+                
+                if (int.TryParse(checkbox.Tag?.ToString(), out int fileID))
                 {
                     var fileData = db.GetFileData(fileID); // 获取文件数据
-                    if (fileData == null) return; // 文件不存在
-                    selectedFiles.Add(fileData); // 添加选中的文件
+                    if (fileData == null) 
+                        continue; // 如果文件数据为空，则跳过
+                    
+                    selectedFiles.Add(fileData); // 添加文件数据到选中的文件列表
                 }
             }
 
             if (selectedFiles.Count == 0)
             {
-                using var toast = new ToastManager(); // 创建 Toast 管理器
-                toast.Show("没有选中任何文件！", "Error"); // 显示 Toast 通知
-                return; // 退出
+                ShowToast("没有选中任何文件！", "Error"); // 显示没有选中任何文件的通知
+                return false; // 返回false
             }
+            return true; // 返回true
+        }
 
-            TipLabel.Content = "备份中，请勿关闭窗口"; // 显示备份提示
+        // 准备备份操作
+        private void PrepareForBackup()
+        {
+            TipLabel.Content = "备份中，请勿关闭窗口"; // 设置提示标签内容
             BackupButton.IsEnabled = false; // 禁用备份按钮
-            WindowState = WindowState.Minimized; // 窗口最小化
+            WindowState = WindowState.Minimized; // 最小化窗口
+        }
 
-            try
-            {
-                await BackupFilesAsync(); // 备份文件
-            }
-            catch (Exception ex)
-            {
-                using var toast = new ToastManager(); // 创建 Toast 管理器
-                toast.Show($"备份失败: {ex.Message}", "Error"); // 显示 Toast 通知
-            }
-            finally
-            {
-                using var toast = new ToastManager(); // 创建 Toast 管理器
-                toast.Show("备份完成！", "Success"); // 显示 Toast 通知
-                TipLabel.Content = "备份完成！"; // 显示备份完成信息
-                BackupButton.IsEnabled = true; // 启用备份按钮
-                if (ExitAfterBackupCheckBox.IsChecked == true) this.Close(); // 关闭窗口
-                WindowState = WindowState.Normal; // 窗口恢复
-            }
+        // 完成备份操作
+        private void CompleteBackup()
+        {
+            ShowToast("备份完成！", "Success"); // 显示备份完成通知
+            TipLabel.Content = "备份完成！"; // 设置提示标签内容
+            BackupButton.IsEnabled = true; // 启用备份按钮
+            
+            if (ExitAfterBackupCheckBox.IsChecked == true)
+                this.Close(); // 关闭窗口
+                
+            WindowState = WindowState.Normal; // 恢复窗口状态
+        }
+
+        // 显示Toast通知
+        private static void ShowToast(string message, string type)
+        {
+            using var toast = new ToastManager(); // 创建Toast管理器
+            toast.Show(message, type); // 显示Toast通知
         }
 
         // 备份文件
@@ -156,21 +217,35 @@ namespace Backup
         {
             foreach (var file in selectedFiles)
             {
-                try
-                {
-                    Directory.CreateDirectory(file.TargetPath); // 创建目标文件夹
-                    string sourcePaths = string.Join("\n", file.SourcePath.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries));
-                    await Task.Run(() => CopyFiles(sourcePaths, file.TargetPath, file.Style, file.CleanTargetFloder)); // 调用文件复制库
-                }
-                catch (Exception ex)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        using var toast = new ToastManager(); // 创建 Toast 管理器
-                        toast.Show($"备份文件 {file.FileName} 失败: {ex.Message}", "Error"); // 显示 Toast 通知
-                    });
-                }
+                await BackupSingleFileAsync(file); // 备份单个文件
             }
+        }
+
+        // 备份单个文件
+        private async Task BackupSingleFileAsync(FilesDatabase.FileData file)
+        {
+            try
+            {
+                Directory.CreateDirectory(file.TargetPath); // 创建目标文件夹
+                string sourcePaths = PrepareSourcePaths(file.SourcePath); // 准备源路径字符串
+                await Task.Run(() => CopyFiles(sourcePaths, file.TargetPath, file.Style, file.CleanTargetFloder)); // 异步执行文件复制
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() =>
+                    ShowToast($"备份文件 {file.FileName} 失败: {ex.Message}", "Error")
+                );
+            }
+        }
+
+        /// <summary>
+        /// 准备源路径字符串
+        /// </summary>
+        /// <param name="sourcePath">源路径</param>
+        /// <returns>源路径字符串</returns>
+        private static string PrepareSourcePaths(string sourcePath)
+        {
+            return string.Join("\n", sourcePath.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)); // 返回源路径字符串
         }
 
         // 删除文件
