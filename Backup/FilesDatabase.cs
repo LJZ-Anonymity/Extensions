@@ -1,7 +1,7 @@
 ﻿using System.Data.SQLite;
 using System.IO;
 
-namespace QuickerExtension.Backup
+namespace Backup
 {
     class FilesDatabase
     {

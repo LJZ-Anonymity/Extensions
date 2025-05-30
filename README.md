@@ -1,3 +1,3 @@
 # QuickerExtension
 
-QUicker 的扩展
+Quicker 的扩展

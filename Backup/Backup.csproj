@@ -5,14 +5,10 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Quicker.ico</ApplicationIcon>
     <Company>Anonymity</Company>
     <PackageIcon></PackageIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="Quicker.ico" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Quicker\Quicker.csproj" />

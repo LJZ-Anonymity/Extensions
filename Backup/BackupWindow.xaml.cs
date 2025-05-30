@@ -5,22 +5,23 @@ using Quicker.Interface;
 using Quicker.Managers;
 using System.Windows;
 using System.IO;
+using Backup;
 
-namespace QuickerExtension.Backup
+namespace Backup
 {
     public partial class BackupWindow : Window, IExtensionModule
     {
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
         private readonly FilesDatabase db = new(); // 文件数据库
 
-        // 使用 DllImport 特性来声明外部函数，并手动指定字符串的封送方式
-        [DllImport("FileCopy.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void CopyFiles(
-            [MarshalAs(UnmanagedType.LPWStr)] string sourcePaths,
-            [MarshalAs(UnmanagedType.LPWStr)] string targetPath,
-            [MarshalAs(UnmanagedType.LPWStr)] string style,
-            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder
-        ); // 复制文件
+        // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
+        [LibraryImport("FileCopy/FileCopy.dll")]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        private static partial void CopyFiles(
+            [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
+            [MarshalAs(UnmanagedType.LPStr)] string targetPath,
+            [MarshalAs(UnmanagedType.LPStr)] string style,
+            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 外部函数声明
 
         // 实现 IExtensionModule 接口的 Initialize 方法
         public void Initialize()
@@ -158,7 +159,8 @@ namespace QuickerExtension.Backup
                 try
                 {
                     Directory.CreateDirectory(file.TargetPath); // 创建目标文件夹
-                    await Task.Run(() => CopyFiles(file.SourcePath, file.TargetPath, file.Style, file.CleanTargetFloder)); // 调用文件复制库
+                    string sourcePaths = string.Join("\n", file.SourcePath.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries));
+                    await Task.Run(() => CopyFiles(sourcePaths, file.TargetPath, file.Style, file.CleanTargetFloder)); // 调用文件复制库
                 }
                 catch (Exception ex)
                 {

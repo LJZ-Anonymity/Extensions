@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using System.Windows;
 
-namespace QuickerExtension.Backup
+namespace Backup
 {
     public partial class AddBackupItemWindow : Window
     {
@@ -19,17 +19,17 @@ namespace QuickerExtension.Backup
         {
             if (style == "File")
             {
-                this.Title = "添加要备份的文件"; //添加要备份的文件
+                Title = "添加要备份的文件"; //添加要备份的文件
                 DescriptionLabel.Content = "源文件地址"; //源文件地址
             }
             else if (style == "Folder")
             {
-                this.Title = "添加要备份的文件夹"; //添加要备份的文件夹
+                Title = "添加要备份的文件夹"; //添加要备份的文件夹
                 DescriptionLabel.Content = "源文件夹地址"; //源文件夹地址
             }
             else
             {
-                this.Title = "添加备份信息"; //添加备份信息
+                Title = "添加备份信息"; //添加备份信息
                 var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
                 DescriptionLabel.Content = backupData.Style == "File" ? "源文件地址" : "源文件夹地址"; //备份文件类型
                 TitleTextBox.Text = backupData.FileName; //备份文件名

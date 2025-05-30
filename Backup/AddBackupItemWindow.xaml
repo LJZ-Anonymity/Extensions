@@ -3,8 +3,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Class="QuickerExtension.Backup.AddBackupItemWindow"
-    xmlns:local="clr-namespace:QuickerExtension.Backup"
+    x:Class="Backup.AddBackupItemWindow"
+    xmlns:local="clr-namespace:Backup"
     mc:Ignorable="d"
     
     WindowStartupLocation="CenterScreen"
