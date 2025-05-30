@@ -6,13 +6,13 @@
 
 ## 概述
 
-Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自己的扩展模块，并将其放置在应用的 `Modules` 目录中，Quicker 将自动加载和初始化这些模块。
+Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自己的扩展模块，并将其放置在扩展目录中，Quicker 将自动加载和初始化这些模块。
 
 ## 创建扩展模块
 
 ### 步骤 1: 创建一个类库项目
 
-使用 Visual Studio 或其他 .NET 开发工具创建一个类库项目（.NET Standard 2.0 或更高版本）。
+使用 Visual Studio 或其他 .NET 开发工具创建一个类库项目（.NET 8.0 或更高版本）。
 
 ### 步骤 2: 添加对 Quicker.Interface 的引用
 
@@ -38,7 +38,18 @@ namespace YourNamespace
         
         // 依赖关系
         public string[] Dependencies => new string[0]; // 如果依赖其他模块，在这里指定
-        
+        // 如果没有依赖项：
+        {
+            // 方式1：返回空数组
+            public string[] Dependencies => new string[0];
+
+            // 方式2：返回空数组（另一种写法）
+            public string[] Dependencies => Array.Empty<string>();
+
+            // 方式3：返回null
+            public string[] Dependencies => null;
+        }
+
         // UI相关
         public bool HasUI => true; // 如果模块有UI界面，设为true
         
@@ -69,15 +80,15 @@ namespace YourNamespace
 
 ### 步骤 4: 编译项目
 
-编译项目，生成 DLL 文件。
+编译项目，生成 `.dll` 文件。
 
 ### 步骤 5: 部署模块
-
-将生成的 DLL 文件复制到 Quicker 应用的 `Modules` 目录中。
+在本地`C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions`路径下为模块创建一个新的文件夹
+将生成的 `.dll` 文件复制到刚才创建的文件夹目录中。
 
 ## 模块生命周期
 
-1. **加载**: Quicker 启动时，会扫描 `Modules` 目录中的所有 DLL 文件。
+1. **加载**: Quicker 启动时，会扫描扩展目录中的所有 `.dll` 文件。
 2. **发现**: 查找实现了 `IExtensionModule` 接口的类。
 3. **依赖解析**: 按照依赖关系排序模块。
 4. **初始化**: 调用 `Initialize()` 方法。
@@ -108,7 +119,7 @@ public string[] Dependencies => new string[] { "OtherModuleName" };
 ## 常见问题
 
 ### Q: 我的模块没有被加载怎么办？
-A: 确保DLL文件放在正确的目录中，并且包含实现了 `IExtensionModule` 接口的公共类。
+A: 确保 `.dll` 文件放在正确的目录中，并且包含实现了 `IExtensionModule` 接口的公共类。
 
 ### Q: 如何在模块中访问主应用程序的功能？
 A: 可以通过依赖注入或服务定位器模式来访问主应用程序提供的服务。

@@ -1,8 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Quicker.Interface;
 using Quicker.Managers;
+using Quicker.Extend;
 using System.Windows;
 using System.IO;
 
@@ -10,6 +10,13 @@ namespace Backup
 {
     public partial class BackupWindow : Window, IExtensionModule
     {
+        public new string Name => "Backup"; // 名称
+        public string Version => "1.0.0"; // 版本
+        public string Author => "Anonymity"; // 作者
+        public string Description => "备份文件的扩展模块"; // 描述信息
+        public bool HasUI => true; // 是否有UI
+        public string[] Dependencies => []; // 依赖模块
+
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
         private const string DLL_PATH = "FileCopy/FileCopy.dll"; // 文件复制DLL路径
         private readonly FilesDatabase db = new(); // 文件数据库
@@ -22,6 +29,11 @@ namespace Backup
             [MarshalAs(UnmanagedType.LPStr)] string targetPath,
             [MarshalAs(UnmanagedType.LPStr)] string style,
             [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
+
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
 
         // 实现 IExtensionModule 接口的 Initialize 方法
         public void Initialize()
@@ -323,6 +335,11 @@ namespace Backup
                 VerticalScrollBar.ViewportSize = scrollViewer.ViewportHeight; // 设置滚动条可视大小
                 VerticalScrollBar.Value = scrollViewer.VerticalOffset; // 设置滚动条当前值
             }
+        }
+
+        public void Stop()
+        {
+            throw new NotImplementedException();
         }
     }
 }
