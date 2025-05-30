@@ -1,7 +1,3 @@
-# QuickerExtension
-
-自制 Quicker 应用的扩展模块
-
 # Quicker 扩展模块开发指南
 
 ## 概述
