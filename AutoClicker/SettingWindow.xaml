@@ -3,14 +3,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Connector"
-    x:Class="Connector.MainWindow"
+    xmlns:local="clr-namespace:AutoClicker"
+    x:Class="AutoClicker.SettingWindow"
     mc:Ignorable="d"
-    
+        
+    WindowStartupLocation="CenterOwner"
+    ResizeMode="NoResize"
+    Title="连点器-设置"
+    Topmost="True"
     Height="450"
-    Width="800"
->
+    Width="800">
     <Grid>
-
+        
     </Grid>
 </Window>

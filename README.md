@@ -69,6 +69,7 @@ namespace YourNamespace
 
 ### 步骤 5: 部署模块
 在本地 C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions 路径下为模块创建一个新的文件夹
+
 将生成的 .dll 文件复制到刚才创建的文件夹目录中。
 
 ## 模块生命周期
@@ -99,7 +100,7 @@ public string[] Dependencies => new string[] { "OtherModuleName" };
 
 ## 示例
 
-请参考 [Examples/SampleModule.cs](https://github.com/Anonymity3314/QuickerExtensions/blob/master/Examples/SampleModule.cs "查看样板文件")。 文件，了解如何实现一个简单的扩展模块。
+请参考 [Examples/SampleModule.cs](https://github.com/Anonymity3314/QuickerExtensions/blob/master/Examples/SampleModule.cs "查看样板文件") 文件，了解如何实现一个简单的扩展模块。
 
 ## 常见问题
 
@@ -115,6 +116,12 @@ A: 是的，ShowWindow() 方法可以显示主窗口，其他窗口可以在需�
 ### Q: 如何调试模块？
 A: 可以将模块项目添加到主应用程序的解决方案中，并设置调试选项。
 
+## 建议
+
+如果有外部模块，可以在模块文件夹中创建一个文件夹，用于放置外部模块，避免加载扩展模块时报错。
+
+扩展模块的数据库文件应该放在模块文件夹中，避免与主程序文件冲突。
+
 ## 联系方式
 
-如有任何问题或建议，请联系我：[联系方式](https://github.com/Anonymity3314 "访问作者主页")。
+如有任何问题或建议，请联系我：[查看联系方式](https://github.com/Anonymity3314 "访问作者主页")。
