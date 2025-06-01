@@ -4,6 +4,9 @@
 
 Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自己的扩展模块，并将其放置在扩展目录中，Quicker 将自动加载和初始化这些模块。
 
+- [扩展/插件仓库](https://github.com/LJZ-Anonymity/Extensions)
+- [使用说明/文档](https://github.com/LJZ-Anonymity/Instructions)
+
 ## 创建扩展模块
 
 ### 步骤 1: 创建一个类库项目
@@ -100,7 +103,7 @@ public string[] Dependencies => new string[] { "OtherModuleName" };
 
 ## 示例
 
-请参考 [Examples/SampleModule.cs](https://github.com/Anonymity3314/QuickerExtensions/blob/master/Examples/SampleModule.cs "查看样板文件") 文件，了解如何实现一个简单的扩展模块。
+请参考 [Examples/SampleModule.cs](https://github.com/LJZ-Anonymity/QuickerExtensions/blob/master/Examples/SampleModule.cs "查看样板文件") 文件，了解如何实现一个简单的扩展模块。
 
 ## 常见问题
 
@@ -124,4 +127,4 @@ A: 可以将模块项目添加到主应用程序的解决方案中，并设置�
 
 ## 联系方式
 
-如有任何问题或建议，请联系我：[查看联系方式](https://github.com/Anonymity3314 "访问作者主页")。
+如有任何问题或建议，请联系我：[查看联系方式](https://github.com/LJZ-Anonymity "访问作者主页")。
