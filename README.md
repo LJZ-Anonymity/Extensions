@@ -4,8 +4,8 @@
 
 Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自己的扩展模块，并将其放置在扩展目录中，Quicker 将自动加载和初始化这些模块。
 
-- [扩展/插件仓库](https://github.com/LJZ-Anonymity/Extensions)
-- [使用说明/文档](https://github.com/LJZ-Anonymity/Instructions)
+- [Quicker 应用](https://github.com/LJZ-Anonymity/Quicker "查看Quicker项目")
+- [使用说明/文档](https://github.com/LJZ-Anonymity/Instructions "查看说明文档项目")
 
 ## 创建扩展模块
 

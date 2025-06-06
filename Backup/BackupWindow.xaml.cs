@@ -32,7 +32,14 @@ namespace Backup
 
         public void Start()
         {
-            throw new NotImplementedException();
+            // 加载初始数据
+            Refresh();
+            
+            // 显示窗口
+            if (Visibility != Visibility.Visible)
+            {
+                ShowWindow();
+            }
         }
 
         // 实现 IExtensionModule 接口的 Initialize 方法
