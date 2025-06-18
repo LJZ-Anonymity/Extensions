@@ -1,11 +1,41 @@
 # Quicker 扩展模块开发指南
 
-## 概述
+[![主项目 Quicker](https://img.shields.io/badge/Main%20Project-Quicker-blue)](https://github.com/LJZ-Anonymity/Quicker)
+[![开源协议](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/LJZ-Anonymity/Extensions/blob/master/LICENSE)
+[![最后更新](https://img.shields.io/github/last-commit/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions/commits)
+[![主要语言](https://img.shields.io/github/languages/top/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions)
 
-Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自己的扩展模块，并将其放置在扩展目录中，Quicker 将自动加载和初始化这些模块。
+## 项目简介
+
+本项目为 Quicker 应用的扩展模块开发指南及示例，旨在帮助开发者基于 Quicker 实现更多自定义功能。
+
+**注意：本扩展机制目前为本开源项目独有，非正版 Quicker 官方功能。**
 
 - [Quicker 应用](https://github.com/LJZ-Anonymity/Quicker "查看Quicker项目")
-- [使用说明/文档](https://github.com/LJZ-Anonymity/Instructions "查看说明文档项目")
+- [使用说明/文档项目](https://github.com/LJZ-Anonymity/Instructions "查看说明文档项目")
+
+## 适用范围
+
+本仓库适用于基于 [LJZ-Anonymity/Quicker](https://github.com/LJZ-Anonymity/Quicker) 项目开发的扩展模块。
+
+与正版 Quicker 软件无关，扩展模块仅适用于本开源项目。
+
+## 开源协议
+
+本项目采用 [MIT License](LICENSE) 协议开源，允许自由使用、修改和分发。
+
+## 版权声明
+
+- 本项目为开源学习项目，所有代码均为作者及社区贡献者独立编写。
+- 与正版 Quicker 软件无任何代码关联，扩展机制为本项目自定义实现。
+- 如有侵权或不当使用第三方资源，请及时联系作者删除。
+
+## 免责声明
+
+本项目及其扩展模块仅供学习和非商业用途。
+因使用本项目或扩展模块造成的任何后果，作者不承担任何责任。
+
+---
 
 ## 创建扩展模块
 
@@ -13,9 +43,9 @@ Quicker 应用支持通过扩展模块来增强功能。开发者可以创建自
 
 使用 Visual Studio 或其他 .NET 开发工具创建一个类库项目（.NET 8.0 或更高版本）。
 
-### 步骤 2: 添加对 Quicker.Interface 的引用
+### 步骤 2: 添加对 Quicker.exe 的引用
 
-将 Quicker.Interface.dll 添加为项目引用，或者直接引用包含 IExtensionModule 接口的程序集。
+将 Quicker.exe 添加为项目引用，或者直接引用包含 IExtensionModule 接口的程序集。
 
 ### 步骤 3: 实现 IExtensionModule 接口
 
@@ -71,9 +101,15 @@ namespace YourNamespace
 编译项目，生成 .dll 文件。
 
 ### 步骤 5: 部署模块
-在本地 C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions 路径下为模块创建一个新的文件夹
 
-将生成的 .dll 文件复制到刚才创建的文件夹目录中。
+在本地 `C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions` 路径下为模块创建一个新的文件夹，将生成的 .dll 文件复制到该文件夹中。
+
+#### 建议
+
+- 外部依赖请放在模块文件夹的子目录中，避免冲突。
+- 扩展模块的数据库文件建议放在模块文件夹中，避免与主程序文件冲突。
+
+---
 
 ## 模块生命周期
 
@@ -87,44 +123,46 @@ namespace YourNamespace
 
 ## 模块间依赖
 
-如果你的模块依赖于其他模块，可以在 Dependencies 属性中指定依赖模块的名称。Quicker 将确保按正确的顺序初始化模块。
+如需依赖其他模块，在 `Dependencies` 属性中指定依赖模块名称。
 
-```csharp
-public string[] Dependencies => new string[] { "OtherModuleName" };
-```
+---
 
 ## 最佳实践
 
-1. **提供完整的元数据**: 确保填写正确的模块名称、版本、作者和描述信息。
-2. **正确处理异常**: 在模块代码中妥善处理异常，避免影响主应用程序。
-3. **资源管理**: 在 Stop() 方法中释放所有资源，包括关闭窗口、停止线程等。
-4. **依赖管理**: 明确声明模块的依赖关系，避免循环依赖。
-5. **UI设计**: 如果模块有UI界面，确保它与主应用程序的风格一致。
+1. **提供完整的元数据**：确保填写正确的模块名称、版本、作者和描述信息。
+2. **正确处理异常**：在模块代码中妥善处理异常，避免影响主应用程序。
+3. **资源管理**：在 Stop() 方法中释放所有资源，包括关闭窗口、停止线程等。
+4. **依赖管理**：明确声明模块的依赖关系，避免循环依赖。
+5. **UI设计**：如有UI界面，确保风格与主应用程序一致。
+
+---
 
 ## 示例
 
-请参考 [Examples/SampleModule.cs](https://github.com/LJZ-Anonymity/QuickerExtensions/blob/master/Examples/SampleModule.cs "查看样板文件") 文件，了解如何实现一个简单的扩展模块。
+请参考 [Examples/SampleModule.cs](https://github.com/LJZ-Anonymity/Extensions/blob/master/Examples/SampleModule.cs "查看样板文件") 文件，了解如何实现一个简单的扩展模块。
+
+---
 
 ## 常见问题
 
 ### Q: 我的模块没有被加载怎么办？
+
 A: 确保 .dll 文件放在正确的目录中，并且包含实现了 IExtensionModule 接口的公共类。
 
 ### Q: 如何在模块中访问主应用程序的功能？
+
 A: 可以通过依赖注入或服务定位器模式来访问主应用程序提供的服务。
 
 ### Q: 模块可以有多个窗口吗？
+
 A: 是的，ShowWindow() 方法可以显示主窗口，其他窗口可以在需要时创建和显示。
 
 ### Q: 如何调试模块？
+
 A: 可以将模块项目添加到主应用程序的解决方案中，并设置调试选项。
 
-## 建议
-
-如果有外部模块，可以在模块文件夹中创建一个文件夹，用于放置外部模块，避免加载扩展模块时报错。
-
-扩展模块的数据库文件应该放在模块文件夹中，避免与主程序文件冲突。
+---
 
 ## 联系方式
 
-如有任何问题或建议，请联系我：[查看联系方式](https://github.com/LJZ-Anonymity "访问作者主页")。
+如有任何问题或建议，请[联系作者](https://github.com/LJZ-Anonymity/Quicker?tab=readme-ov-file#contact "访问作者主页")。

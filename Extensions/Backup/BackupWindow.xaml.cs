@@ -103,6 +103,7 @@ namespace Backup
         /// <summary>
         /// 创建文件项的网格
         /// </summary>
+        /// <returns>网格</returns>
         private static Grid CreateGridForItem()
         {
             return new Grid
@@ -116,6 +117,7 @@ namespace Backup
         /// 创建文件项的复选框
         /// </summary>
         /// <param name="file">文件数据</param>
+        /// <returns>复选框</returns>
         private static CheckBox CreateCheckbox(FilesDatabase.FileData file)
         {
             return new CheckBox
@@ -133,6 +135,7 @@ namespace Backup
         /// <param name="fileId">文件ID</param>
         /// <param name="leftMargin">左侧边距</param>
         /// <param name="clickHandler">点击事件</param>
+        /// <returns>按钮</returns>
         private Button CreateButton(string content, int fileId, double leftMargin, RoutedEventHandler clickHandler)
         {
             var button = new Button
@@ -344,9 +347,10 @@ namespace Backup
             }
         }
 
+        // 停止模块
         public void Stop()
         {
-            throw new NotImplementedException();
+
         }
     }
 }

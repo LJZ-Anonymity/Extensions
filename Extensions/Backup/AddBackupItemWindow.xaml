@@ -26,12 +26,12 @@
 
     <Grid>
         <Label Content="标题" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top" Width="93" HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
-        <TextBox x:Name="TitleTextBox" Style="{StaticResource RoundedTextBox}" HorizontalAlignment="Left" Margin="114,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="246" Height="17" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="TitleTextBox" Style="{StaticResource RoundedTextBox}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="246" TextChanged="TextBox_TextChanged" Margin="114,10,0,0"/>
         <Label x:Name="DescriptionLabel" Content="源文件地址" Margin="5,54,336,171" HorizontalContentAlignment="Right" Height="60"/>
-        <TextBox x:Name="SourceLocationTextBox" Style="{StaticResource RoundedTextBox}" ToolTip="可以通过多次选择来添加文件夹" HorizontalAlignment="Left" Margin="114,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="246" Height="52" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="SourceLocationTextBox" Style="{StaticResource RoundedTextBox}" ToolTip="可以通过多次选择来添加文件夹" HorizontalAlignment="Left" Margin="114,40,0,0" VerticalAlignment="Top" Width="246" Height="52" TextChanged="TextBox_TextChanged"/>
         <Button x:Name="SourceLocationButton" Content="选择..." Style="{StaticResource WhiteButton}" HorizontalAlignment="Left" Margin="365,54,0,0" VerticalAlignment="Top" Width="53" Height="24" Click="SourceLocationButton_Click"/>
         <Label Content="目标文件夹地址" Margin="5,107,336,118" HorizontalContentAlignment="Right" Height="60"/>
-        <TextBox x:Name="TargetLocationTextBox" Style="{StaticResource RoundedTextBox}" HorizontalAlignment="Left" Margin="114,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="246" Height="45" TextChanged="TextBox_TextChanged"/>
+        <TextBox x:Name="TargetLocationTextBox" Style="{StaticResource RoundedTextBox}" HorizontalAlignment="Left" Margin="114,97,0,0" VerticalAlignment="Top" Width="246" Height="45" TextChanged="TextBox_TextChanged"/>
         <Button x:Name="TargetLocationSelectButton" Content="选择..." Style="{StaticResource WhiteButton}" HorizontalAlignment="Left" Margin="365,107,0,0" VerticalAlignment="Top" Width="54" Height="25" Click="TargetLocationSelectButton_Click"/>
         <Button x:Name="SaveButton" Content="保存" Style="{StaticResource BlueButton}" Width="69" HorizontalAlignment="Left" Margin="127,233,0,0" VerticalAlignment="Top" Click="SaveButton_Click" IsEnabled="False"/>
         <Button x:Name="CancelButton" Content="取消" Style="{StaticResource WhiteButton}" HorizontalAlignment="Left" Margin="267,233,0,0" Width="69" VerticalAlignment="Top" Click="CancelButton_Click"/>

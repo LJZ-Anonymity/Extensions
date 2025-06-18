@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Quicker\Quicker.csproj" />
     <ProjectReference Include="..\..\Quicker\Quicker.csproj" />
   </ItemGroup>
 
