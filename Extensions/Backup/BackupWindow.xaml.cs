@@ -18,11 +18,10 @@ namespace Backup
         public string[] Dependencies => []; // 依赖模块
 
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
-        private const string DLL_PATH = "FileCopy/FileCopy.dll"; // 文件复制DLL路径
         private readonly FilesDatabase db = new(); // 文件数据库
 
         // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
-        [LibraryImport(DLL_PATH)]
+        [LibraryImport("FileCopy.dll")]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         private static partial void CopyFiles(
             [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
@@ -30,15 +29,15 @@ namespace Backup
             [MarshalAs(UnmanagedType.LPStr)] string style,
             [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetDllDirectory(string lpPathName); // 设置 DLL 搜索目录
+
         public void Start()
         {
-            // 加载初始数据
-            Refresh();
-            
-            // 显示窗口
+            Refresh(); // 加载初始数据
             if (Visibility != Visibility.Visible)
             {
-                ShowWindow();
+                ShowWindow(); // 显示窗口
             }
         }
 
@@ -58,6 +57,9 @@ namespace Backup
         public BackupWindow()
         {
             InitializeComponent(); // 初始化组件
+
+            string extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location); // 获取扩展 DLL 所在目录
+            SetDllDirectory(extDir); // 设置 DLL 搜索目录
         }
 
         // 加载要备份的文件列表
@@ -350,7 +352,19 @@ namespace Backup
         // 停止模块
         public void Stop()
         {
-
+            if (this.IsVisible) // 如果窗口可见
+            {
+                this.Dispatcher.Invoke(() =>
+                {
+                    try
+                    {
+                        this.Close(); // 关闭窗口
+                    }
+                    catch { }
+                }); // 在UI线程中执行
+            }
+            MainGrid?.Children.Clear(); // 释放主界面资源
+            GC.Collect(); // 回收内存
         }
     }
 }

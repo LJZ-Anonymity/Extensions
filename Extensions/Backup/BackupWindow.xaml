@@ -45,7 +45,7 @@
         </Popup>
         <Button x:Name="BackupButton" Style="{StaticResource WhiteButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="136,10,0,0" VerticalAlignment="Top" Click="BackupButton_Click" Content="进行备份"/>
         <Label x:Name="TipLabel" Content="备份完成前，请勿关闭窗口" HorizontalAlignment="Left" Margin="260,10,0,0" VerticalAlignment="Top"/>
-        <CheckBox x:Name="ExitAfterBackupCheckBox" Content="完成备份后关闭程序" HorizontalAlignment="Right" Margin="0,16,30,0" VerticalAlignment="Top" IsChecked="True"/>
+        <CheckBox x:Name="ExitAfterBackupCheckBox" Content="完成备份后关闭扩展" HorizontalAlignment="Right" Margin="0,16,30,0" VerticalAlignment="Top" IsChecked="True"/>
         <Border Margin="0,42,0,0" BorderThickness="1" BorderBrush="#FFCCCCCC">
             <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" ScrollChanged="ListViewScrollViewer_ScrollChanged">
                 <StackPanel x:Name="MainStackPanel"/>

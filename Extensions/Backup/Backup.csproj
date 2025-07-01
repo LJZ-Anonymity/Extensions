@@ -8,6 +8,7 @@
     <Company>Anonymity</Company>
     <PackageIcon></PackageIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Authors>Anonymity</Authors>
   </PropertyGroup>
 
   <ItemGroup>

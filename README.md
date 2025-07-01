@@ -1,28 +1,44 @@
 # Quicker 扩展模块开发指南
 
-[![主项目 Quicker](https://img.shields.io/badge/Main%20Project-Quicker-blue)](https://github.com/LJZ-Anonymity/Quicker)
-[![开源协议](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/LJZ-Anonymity/Extensions/blob/master/LICENSE)
-[![最后更新](https://img.shields.io/github/last-commit/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions/commits)
-[![主要语言](https://img.shields.io/github/languages/top/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions)
+<p align="center">
+  <a href="https://github.com/LJZ-Anonymity/Quicker">
+    <img src="https://img.shields.io/badge/Main%20Project-Quicker-blue" alt="主项目 Quicker">
+  </a>
+  <a href="https://github.com/LJZ-Anonymity/Extensions/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="开源协议">
+  </a>
+  <a href="https://github.com/LJZ-Anonymity/Extensions/commits">
+    <img src="https://img.shields.io/github/last-commit/LJZ-Anonymity/Extensions" alt="最后更新">
+  </a>
+  <a href="https://github.com/LJZ-Anonymity/Extensions">
+    <img src="https://img.shields.io/github/languages/top/LJZ-Anonymity/Extensions" alt="主要语言">
+  </a>
+</p>
+
+> **本项目为 Quicker 应用的扩展模块开发指南及示例，旨在帮助开发者基于 Quicker 实现更多自定义功能。**  
+> **本扩展机制目前为本开源项目独有，非正版 Quicker 官方功能。**
+
+---
 
 ## 项目简介
 
-本项目为 Quicker 应用的扩展模块开发指南及示例，旨在帮助开发者基于 Quicker 实现更多自定义功能。
+本仓库适用于基于 [LJZ-Anonymity/Quicker](https://github.com/LJZ-Anonymity/Quicker) 项目开发的扩展模块。
+与正版 Quicker 软件无关，扩展模块仅适用于本开源项目。
 
-**注意：本扩展机制目前为本开源项目独有，非正版 Quicker 官方功能。**
-
-- [Quicker 应用](https://github.com/LJZ-Anonymity/Quicker "查看Quicker项目")
-- [使用说明/文档项目](https://github.com/LJZ-Anonymity/Instructions "查看说明文档项目")
+---
 
 ## 适用范围
 
-本仓库适用于基于 [LJZ-Anonymity/Quicker](https://github.com/LJZ-Anonymity/Quicker) 项目开发的扩展模块。
+- 仅适用于 LJZ-Anonymity/Quicker 项目。
+- 不适用于正版 Quicker 软件。
 
-与正版 Quicker 软件无关，扩展模块仅适用于本开源项目。
+---
 
 ## 开源协议
 
 本项目采用 [MIT License](LICENSE) 协议开源，允许自由使用、修改和分发。
+
+---
 
 ## 版权声明
 
@@ -30,10 +46,11 @@
 - 与正版 Quicker 软件无任何代码关联，扩展机制为本项目自定义实现。
 - 如有侵权或不当使用第三方资源，请及时联系作者删除。
 
+---
+
 ## 免责声明
 
-本项目及其扩展模块仅供学习和非商业用途。
-因使用本项目或扩展模块造成的任何后果，作者不承担任何责任。
+> **本项目及其扩展模块仅供学习和非商业用途。因使用本项目或扩展模块造成的任何后果，作者不承担任何责任。**
 
 ---
 
@@ -49,8 +66,6 @@
 
 ### 步骤 3: 实现 IExtensionModule 接口
 
-创建一个类，实现 IExtensionModule 接口：
-
 ```csharp
 using Quicker.Interface;
 using System;
@@ -60,9 +75,9 @@ namespace YourNamespace
     public class YourModule : IExtensionModule
     {
         // 模块元数据
-        public string Name => "YourModuleName";
+        public string Name => "扩展名";
         public string Version => "1.0.0";
-        public string Author => "Your Name";
+        public string Author => "您的名称";
         public string Description => "模块描述";
         
         // 依赖关系
@@ -104,22 +119,19 @@ namespace YourNamespace
 
 在本地 `C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions` 路径下为模块创建一个新的文件夹，将生成的 .dll 文件复制到该文件夹中。
 
-#### 建议
-
-- 外部依赖请放在模块文件夹的子目录中，避免冲突。
-- 扩展模块的数据库文件建议放在模块文件夹中，避免与主程序文件冲突。
-
 ---
 
 ## 模块生命周期
 
-1. **加载**: Quicker 启动时，会扫描扩展目录中的所有 .dll 文件。
+1. **加载**: Quicker 启动扩展时，只会加载指定 .dll 文件。
 2. **发现**: 查找实现了 IExtensionModule 接口的类。
 3. **依赖解析**: 按照依赖关系排序模块。
 4. **初始化**: 调用 Initialize() 方法。
 5. **启动**: 调用 Start() 方法。
 6. **显示UI**: 如果 HasUI 为 true，调用 ShowWindow() 方法。
 7. **停止**: 当应用关闭或模块需要卸载时，调用 Stop() 方法。
+
+---
 
 ## 模块间依赖
 
@@ -166,3 +178,9 @@ A: 可以将模块项目添加到主应用程序的解决方案中，并设置�
 ## 联系方式
 
 如有任何问题或建议，请[联系作者](https://github.com/LJZ-Anonymity/Quicker?tab=readme-ov-file#contact "访问作者主页")。
+
+---
+
+<p align="center">
+  ⭐️ 如果你觉得本项目有帮助，欢迎 Star 支持！也欢迎 Issue 和 PR 共同完善！
+</p>

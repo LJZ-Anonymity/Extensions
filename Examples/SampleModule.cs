@@ -1,6 +1,6 @@
+using System.Windows.Forms;
 using Quicker.Interface;
 using System;
-using System.Windows.Forms;
 
 namespace Quicker.Examples
 {
@@ -9,10 +9,10 @@ namespace Quicker.Examples
         private Form _moduleWindow;
 
         // 模块元数据
-        public string Name => "SampleModule";
+        public string Name => "扩展名称";
         public string Version => "1.0.0";
-        public string Author => "Your Name";
-        public string Description => "这是一个示例模块，展示如何实现IExtensionModule接口";
+        public string Author => "作者名称";
+        public string Description => "扩展描述";
         
         // 依赖关系
         public string[] Dependencies => new string[0]; // 无依赖
@@ -54,42 +54,7 @@ namespace Quicker.Examples
                 _moduleWindow.Show();
                 _moduleWindow.BringToFront();
                 return;
-            }
-            
-            // 创建一个简单的窗口
-            _moduleWindow = new Form
-            {
-                Text = Name,
-                Width = 400,
-                Height = 300
-            };
-            
-            // 添加一些控件
-            var label = new Label
-            {
-                Text = Description,
-                AutoSize = true,
-                Location = new System.Drawing.Point(10, 10)
-            };
-            
-            var versionLabel = new Label
-            {
-                Text = $"版本: {Version}",
-                AutoSize = true,
-                Location = new System.Drawing.Point(10, 40)
-            };
-            
-            var authorLabel = new Label
-            {
-                Text = $"作者: {Author}",
-                AutoSize = true,
-                Location = new System.Drawing.Point(10, 70)
-            };
-            
-            _moduleWindow.Controls.Add(label);
-            _moduleWindow.Controls.Add(versionLabel);
-            _moduleWindow.Controls.Add(authorLabel);
-            
+            }            
             // 显示窗口
             _moduleWindow.Show();
         }
