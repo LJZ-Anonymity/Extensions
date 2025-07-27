@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Quicker.Managers;
@@ -21,16 +22,16 @@ namespace Backup
         private readonly FilesDatabase db = new(); // 文件数据库
 
         // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
-        [LibraryImport("FileCopy.dll")]
-        internal static partial void CopyFiles(
+        [LibraryImport("FileCopy.dll", EntryPoint = "CopyFiles")]
+        public static partial void CopyFiles(
             [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
             [MarshalAs(UnmanagedType.LPStr)] string targetPath,
             [MarshalAs(UnmanagedType.LPStr)] string style,
             [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
 
-        [LibraryImport("kernel32.dll", SetLastError = true)]
+        [LibraryImport("kernel32.dll", SetLastError = true, EntryPoint = "SetDllDirectoryW")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static partial bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpPathName); // 设置 DLL 搜索目录
+        public static partial bool SetDllDirectory([MarshalAs(UnmanagedType.LPWStr)] string lpPathName); // 设置 DLL 搜索目录
 
         public void Start()
         {
@@ -57,10 +58,24 @@ namespace Backup
         public BackupWindow()
         {
             InitializeComponent(); // 初始化组件
-            string? extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location); // 获取扩展 DLL 所在目录
-            if (!string.IsNullOrEmpty(extDir))
+            try
             {
-                SetDllDirectory(extDir); // 设置 DLL 搜索目录
+                string? extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location);
+                System.Diagnostics.Debug.WriteLine($"扩展目录: {extDir}");
+                if (!string.IsNullOrEmpty(extDir))
+                {
+                    string fileCopyPath = Path.Combine(extDir, "FileCopy.dll"); // 检查FileCopy.dll是否存在
+                    if (!File.Exists(fileCopyPath))
+                    {
+                        ShowToast($"找不到FileCopy.dll文件: {fileCopyPath}", "Error");
+                        return;
+                    }
+                    bool result = SetDllDirectory(extDir); // 设置 DLL 搜索目录
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"初始化DLL时出错: {ex.Message}", "Error");
             }
         }
 
@@ -119,10 +134,8 @@ namespace Backup
                 Content = file.FileName, // 设置复选框内容
                 Margin = new Thickness(10, 0, 158, 0) // 设置复选框边距
             }; // 返回复选框
-            
-            // 添加点击事件
-            checkbox.Click += Checkbox_Click;
-            
+
+            checkbox.Click += Checkbox_Click; // 添加点击事件
             return checkbox;
         }
 
@@ -240,6 +253,7 @@ namespace Backup
         }
 
         // 显示Toast通知
+        [SupportedOSPlatform("windows")]
         private static void ShowToast(string message, string type)
         {
             using var toast = new ToastManager(); // 创建Toast管理器
@@ -288,9 +302,7 @@ namespace Backup
             var button = (Button)sender; // 获取按钮
             int fileID = (int)button.Tag; // 获取文件ID
             db.DeleteFileData(fileID); // 删除文件数据
-            
-            // 获取父Grid并释放资源
-            if (button.Parent is Grid grid)
+            if (button.Parent is Grid grid) // 获取父Grid并释放资源
             {
                 // 查找并释放CheckBox的事件绑定
                 foreach (var child in grid.Children)
@@ -301,13 +313,12 @@ namespace Backup
                         break;
                     }
                 }
-                
+
                 // 释放按钮的事件绑定
                 button.Click -= DeleteButton_Click;
-                
                 MainStackPanel.Children.Remove(grid); // 删除文件项
             }
-            
+
             UpdateBackupButtonState(); // 更新备份按钮状态
         }
 
@@ -316,7 +327,7 @@ namespace Backup
         {
             var button = (Button)sender; // 获取按钮
             int fileID = (int)button.Tag; // 获取文件ID
-            AddBackupItemWindow addwindow = new(fileID.ToString()); // 创建编辑窗口
+            AddBackupItemWindow addwindow = new(fileID.ToString()) { Owner = this }; // 创建编辑窗口
             addwindow.ShowDialog(); // 显示窗口
         }
 
@@ -371,14 +382,14 @@ namespace Backup
         // 关闭添加窗口
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
         {
-            AddBackupItemWindow addwindow = new("File"); // 创建添加文件窗口
+            AddBackupItemWindow addwindow = new("File") { Owner = this }; // 创建添加文件窗口
             addwindow.ShowDialog(); // 显示窗口
         }
 
         // 打开添加文件夹窗口
         private void AddFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            AddBackupItemWindow addwindow = new("Folder"); // 创建添加文件夹窗口
+            AddBackupItemWindow addwindow = new("Folder") { Owner = this }; // 创建添加文件夹窗口
             addwindow.ShowDialog(); // 显示窗口
         }
 

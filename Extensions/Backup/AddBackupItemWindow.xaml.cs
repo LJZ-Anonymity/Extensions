@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Runtime.Versioning;
+using System.Windows.Forms;
 using System.Windows;
 
 namespace Backup
@@ -123,8 +124,8 @@ namespace Backup
             }
         }
 
-
         // 选择源文件夹
+        [SupportedOSPlatform("windows")]
         private void SelectFolder()
         {
             var folderDialog = new FolderBrowserDialog { ShowNewFolderButton = true }; //创建文件夹对话框
@@ -135,6 +136,7 @@ namespace Backup
         }
 
         // 选择目标文件夹
+        [SupportedOSPlatform("windows")]
         private void TargetLocationSelectButton_Click(object sender, RoutedEventArgs e)
         {
             var folderDialog = new FolderBrowserDialog { ShowNewFolderButton = true }; //创建文件夹对话框
