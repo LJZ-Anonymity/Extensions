@@ -71,7 +71,7 @@ namespace Backup
         /// </summary>
         /// <param name="fileID"> 文件ID </param>
         /// <returns> 文件数据 </returns>
-        public FileData GetFileData(int fileID)
+        public FileData? GetFileData(int fileID)
         {
             using var connection = OpenConnection(); // 打开数据库连接
             using var command = new SQLiteCommand(SQLStatements.SelectFileDataById, connection); // 创建命令对象

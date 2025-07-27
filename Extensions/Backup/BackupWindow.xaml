@@ -22,28 +22,38 @@
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/ScrollBarStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <Style x:Key="FileItemGrid" TargetType="Grid">
+                <Setter Property="Margin" Value="0,5,0,0"/>
+                <Setter Property="Height" Value="24"/>
+                <Setter Property="Width" Value="600"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#EAEAEA"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     
     <Grid x:Name="MainGrid">
         <Button x:Name="AddButton" Style="{StaticResource WhiteButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="14,10,0,0" VerticalAlignment="Top" Click="AddButton_Click" Content="添加类型"/>
-        <Button x:Name="AddButton复制__C_" Style="{StaticResource WhiteButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Click="AddButton_Click" Content="添加类型" Visibility="Hidden"/>
-        <Popup x:Name="Popup" PopupAnimation="Fade" Width="180" Height="65" PlacementTarget="{Binding ElementName=AddButton复制__C_}" Placement="Bottom" AllowsTransparency="True" StaysOpen="False">
+        <Popup x:Name="Popup" PopupAnimation="Fade" Width="117" Height="62" PlacementTarget="{Binding ElementName=AddButton}" Placement="Bottom" AllowsTransparency="True" StaysOpen="False">
             <Grid>
-                <Rectangle Fill="White" Margin="5,7">
-                    <Rectangle.Effect>
-                        <DropShadowEffect Color="#FFBBBBBB" Direction="0" BlurRadius="15" RenderingBias="Quality" ShadowDepth="1"/>
-                    </Rectangle.Effect>
-                </Rectangle>
-                <Border Width="170" Background="White" BorderThickness="0" CornerRadius="3" Margin="5">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="55">
-                        <Button x:Name="AddFileButton" BorderThickness="0" Width="170" Style="{StaticResource MenuButton}" Margin="0,3,0,0" Click="AddFileButton_Click" Content="添加文件"/>
-                        <Button x:Name="AddFolderButton" BorderThickness="0" Width="170" Style="{StaticResource MenuButton}" Click="AddFolderButton_Click" Content="添加文件夹"/>
+                <Border Background="White" Margin="3" CornerRadius="3">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#FFBBBBBB" Direction="0" BlurRadius="6" RenderingBias="Quality" ShadowDepth="1"/>
+                    </Border.Effect>
+                </Border>
+                <Border Width="117" Background="White" CornerRadius="3" Margin="3" Padding="0,3">
+                    <StackPanel>
+                        <Button x:Name="AddFileButton" Width="117" Style="{StaticResource MenuButton}" Click="AddFileButton_Click" Content="添加文件"/>
+                        <Button x:Name="AddFolderButton" Width="117" Style="{StaticResource MenuButton}" Click="AddFolderButton_Click" Content="添加文件夹"/>
                     </StackPanel>
                 </Border>
             </Grid>
         </Popup>
-        <Button x:Name="BackupButton" Style="{StaticResource WhiteButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="136,10,0,0" VerticalAlignment="Top" Click="BackupButton_Click" Content="进行备份"/>
+        <Button x:Name="BackupButton" Style="{StaticResource BlueButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="136,10,0,0" VerticalAlignment="Top" Click="BackupButton_Click" Content="进行备份"/>
         <Label x:Name="TipLabel" Content="备份完成前，请勿关闭窗口" HorizontalAlignment="Left" Margin="260,10,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="ExitAfterBackupCheckBox" Content="完成备份后关闭扩展" HorizontalAlignment="Right" Margin="0,16,30,0" VerticalAlignment="Top" IsChecked="True"/>
         <Border Margin="0,42,0,0" BorderThickness="1" BorderBrush="#FFCCCCCC">

@@ -22,15 +22,15 @@ namespace Backup
 
         // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
         [LibraryImport("FileCopy.dll")]
-        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
-        private static partial void CopyFiles(
+        internal static partial void CopyFiles(
             [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
             [MarshalAs(UnmanagedType.LPStr)] string targetPath,
             [MarshalAs(UnmanagedType.LPStr)] string style,
             [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetDllDirectory(string lpPathName); // 设置 DLL 搜索目录
+        [LibraryImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static partial bool SetDllDirectory([MarshalAs(UnmanagedType.LPStr)] string lpPathName); // 设置 DLL 搜索目录
 
         public void Start()
         {
@@ -57,15 +57,18 @@ namespace Backup
         public BackupWindow()
         {
             InitializeComponent(); // 初始化组件
-
-            string extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location); // 获取扩展 DLL 所在目录
-            SetDllDirectory(extDir); // 设置 DLL 搜索目录
+            string? extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location); // 获取扩展 DLL 所在目录
+            if (!string.IsNullOrEmpty(extDir))
+            {
+                SetDllDirectory(extDir); // 设置 DLL 搜索目录
+            }
         }
 
         // 加载要备份的文件列表
         private void BackupWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Refresh(); // 刷新文件列表
+            UpdateBackupButtonState(); // 初始化备份按钮状态
         }
 
         // 刷新文件列表
@@ -77,6 +80,7 @@ namespace Backup
             {
                 CreateFileItem(file); // 创建文件项
             }
+            UpdateBackupButtonState(); // 更新备份按钮状态
         }
 
         /// <summary>
@@ -86,7 +90,7 @@ namespace Backup
         private void CreateFileItem(FilesDatabase.FileData file)
         {
             // 创建主网格
-            var grid = CreateGridForItem(); // 创建主网格
+            var grid = new Grid() { Style = (Style)FindResource("FileItemGrid") }; // 创建主网格
             MainStackPanel.Children.Add(grid); // 添加主网格
 
             // 添加复选框
@@ -103,31 +107,23 @@ namespace Backup
         }
 
         /// <summary>
-        /// 创建文件项的网格
-        /// </summary>
-        /// <returns>网格</returns>
-        private static Grid CreateGridForItem()
-        {
-            return new Grid
-            {
-                Height = 24, // 设置网格高度
-                Margin = new Thickness(0, 5, 0, 0) // 设置网格边距
-            };
-        }
-
-        /// <summary>
         /// 创建文件项的复选框
         /// </summary>
         /// <param name="file">文件数据</param>
         /// <returns>复选框</returns>
-        private static CheckBox CreateCheckbox(FilesDatabase.FileData file)
+        private CheckBox CreateCheckbox(FilesDatabase.FileData file)
         {
-            return new CheckBox
+            var checkbox = new CheckBox
             {
                 Tag = file.FileID, // 设置复选框标签
                 Content = file.FileName, // 设置复选框内容
                 Margin = new Thickness(10, 0, 158, 0) // 设置复选框边距
             }; // 返回复选框
+            
+            // 添加点击事件
+            checkbox.Click += Checkbox_Click;
+            
+            return checkbox;
         }
 
         /// <summary>
@@ -151,6 +147,26 @@ namespace Backup
             }; // 返回按钮
             button.Click += clickHandler; // 添加点击事件
             return button; // 返回按钮
+        }
+
+        /// <summary>
+        /// 复选框点击事件处理
+        /// </summary>
+        /// <param name="sender">事件源</param>
+        /// <param name="e">事件参数</param>
+        private void Checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateBackupButtonState();
+        }
+
+        /// <summary>
+        /// 更新备份按钮状态
+        /// </summary>
+        private void UpdateBackupButtonState()
+        {
+            var checkboxes = FindVisualChildren<CheckBox>(scrollViewer);
+            bool hasCheckedItems = checkboxes.Any(cb => cb.IsChecked == true);
+            BackupButton.IsEnabled = hasCheckedItems;
         }
 
         // 备份选中的文件
@@ -193,17 +209,11 @@ namespace Backup
                 if (int.TryParse(checkbox.Tag?.ToString(), out int fileID))
                 {
                     var fileData = db.GetFileData(fileID); // 获取文件数据
-                    if (fileData == null) 
-                        continue; // 如果文件数据为空，则跳过
-                    
-                    selectedFiles.Add(fileData); // 添加文件数据到选中的文件列表
+                    if (fileData != null) 
+                    {
+                        selectedFiles.Add(fileData); // 添加文件数据到选中的文件列表
+                    }
                 }
-            }
-
-            if (selectedFiles.Count == 0)
-            {
-                ShowToast("没有选中任何文件！", "Error"); // 显示没有选中任何文件的通知
-                return false; // 返回false
             }
             return true; // 返回true
         }
@@ -278,7 +288,27 @@ namespace Backup
             var button = (Button)sender; // 获取按钮
             int fileID = (int)button.Tag; // 获取文件ID
             db.DeleteFileData(fileID); // 删除文件数据
-            MainStackPanel.Children.Remove(button.Parent as Grid); // 删除文件项
+            
+            // 获取父Grid并释放资源
+            if (button.Parent is Grid grid)
+            {
+                // 查找并释放CheckBox的事件绑定
+                foreach (var child in grid.Children)
+                {
+                    if (child is CheckBox checkbox)
+                    {
+                        checkbox.Click -= Checkbox_Click; // 解除事件绑定
+                        break;
+                    }
+                }
+                
+                // 释放按钮的事件绑定
+                button.Click -= DeleteButton_Click;
+                
+                MainStackPanel.Children.Remove(grid); // 删除文件项
+            }
+            
+            UpdateBackupButtonState(); // 更新备份按钮状态
         }
 
         // 编辑文件
@@ -293,7 +323,25 @@ namespace Backup
         // 关闭窗口时释放数据库资源
         protected override void OnClosed(EventArgs e)
         {
-            base.OnClosed(e); // 关闭窗口时释放数据库资源
+            // 释放所有CheckBox的事件绑定
+            var checkboxes = FindVisualChildren<CheckBox>(scrollViewer);
+            foreach (var checkbox in checkboxes)
+            {
+                checkbox.Click -= Checkbox_Click;
+            }
+            
+            // 释放所有按钮的事件绑定
+            var buttons = FindVisualChildren<Button>(scrollViewer);
+            foreach (var button in buttons)
+            {
+                if (button.Tag != null && int.TryParse(button.Tag.ToString(), out _))
+                {
+                    button.Click -= DeleteButton_Click;
+                    button.Click -= EditButton_Click;
+                }
+            }
+            
+            base.OnClosed(e); // 调用基类的OnClosed方法
             MainGrid.Children.Clear(); // 清空窗口内容
             GC.Collect(); // 回收内存
         }

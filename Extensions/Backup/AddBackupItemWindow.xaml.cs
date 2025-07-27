@@ -34,11 +34,14 @@ namespace Backup
                 default:
                     Title = "修改备份信息"; //修改备份信息
                     var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
-                    DescriptionLabel.Content = backupData.Style == "File" ? "源文件地址" : "源文件夹地址"; //备份文件类型
-                    TitleTextBox.Text = backupData.FileName; //备份文件名
-                    SourceLocationTextBox.Text = backupData.SourcePath; //源文件或文件夹地址
-                    TargetLocationTextBox.Text = backupData.TargetPath; //目标文件夹地址
-                    DeleteTargetFolderCheckBox.IsChecked = backupData.CleanTargetFloder; //是否删除目标文件夹
+                    if (backupData != null)
+                    {
+                        DescriptionLabel.Content = backupData.Style == "File" ? "源文件地址" : "源文件夹地址"; //备份文件类型
+                        TitleTextBox.Text = backupData.FileName; //备份文件名
+                        SourceLocationTextBox.Text = backupData.SourcePath; //源文件或文件夹地址
+                        TargetLocationTextBox.Text = backupData.TargetPath; //目标文件夹地址
+                        DeleteTargetFolderCheckBox.IsChecked = backupData.CleanTargetFloder; //是否删除目标文件夹
+                    }
                     break;
             }
         }
@@ -68,10 +71,13 @@ namespace Backup
             else
             {
                 var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
-                db.UpdateFileData(int.Parse(style), SourceLocationTextBox.Text, TargetLocationTextBox.Text, TitleTextBox.Text, backupData.Style, deleteSource); //更新备份信息
+                if (backupData != null)
+                {
+                    db.UpdateFileData(int.Parse(style), SourceLocationTextBox.Text, TargetLocationTextBox.Text, TitleTextBox.Text, backupData.Style, deleteSource); //更新备份信息
+                }
             }
 
-            BackupWindow mainWindow = System.Windows.Application.Current.Windows.OfType<BackupWindow>().FirstOrDefault(); //获取主窗口
+            BackupWindow? mainWindow = System.Windows.Application.Current.Windows.OfType<BackupWindow>().FirstOrDefault(); //获取主窗口
             mainWindow?.Refresh(); //刷新主窗口
             Close(); //关闭窗口
         }
@@ -90,13 +96,16 @@ namespace Backup
             else
             {
                 var backupData = db.GetFileData(int.Parse(style)); //获取备份信息
-                if (backupData.Style == "File")
+                if (backupData != null)
                 {
-                    SelectFiles(); //选择源文件
-                }
-                else if (backupData.Style == "Folder")
-                {
-                    SelectFolder(); //选择源文件夹
+                    if (backupData.Style == "File")
+                    {
+                        SelectFiles(); //选择源文件
+                    }
+                    else if (backupData.Style == "Folder")
+                    {
+                        SelectFolder(); //选择源文件夹
+                    }
                 }
             }
         }
