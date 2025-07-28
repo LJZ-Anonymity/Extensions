@@ -1,19 +1,10 @@
 # Quicker 扩展模块开发指南
 
-<p align="center">
-  <a href="https://github.com/LJZ-Anonymity/Quicker">
-    <img src="https://img.shields.io/badge/Main%20Project-Quicker-blue" alt="主项目 Quicker">
-  </a>
-  <a href="https://github.com/LJZ-Anonymity/Extensions/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="开源协议">
-  </a>
-  <a href="https://github.com/LJZ-Anonymity/Extensions/commits">
-    <img src="https://img.shields.io/github/last-commit/LJZ-Anonymity/Extensions" alt="最后更新">
-  </a>
-  <a href="https://github.com/LJZ-Anonymity/Extensions">
-    <img src="https://img.shields.io/github/languages/top/LJZ-Anonymity/Extensions" alt="主要语言">
-  </a>
-</p>
+[![主项目](https://img.shields.io/badge/Main%20Project-Quicker-blue)](https://github.com/LJZ-Anonymity/Quicker)
+[![最后更新](https://img.shields.io/github/last-commit/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions/commits)
+[![开源协议](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/LJZ-Anonymity/Extensions/blob/master/LICENSE)
+[![代码行数](https://aschey.tech/tokei/github/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions)
+[![主要语言](https://img.shields.io/github/languages/top/LJZ-Anonymity/Extensions)](https://github.com/LJZ-Anonymity/Extensions)
 
 > **本项目为 Quicker 应用的扩展模块开发指南及示例，旨在帮助开发者基于 Quicker 实现更多自定义功能。**  
 > **本扩展机制目前为本开源项目独有，非正版 Quicker 官方功能。**
@@ -79,29 +70,29 @@ namespace YourNamespace
         public string Version => "1.0.0";
         public string Author => "您的名称";
         public string Description => "模块描述";
-        
+
         // 依赖关系
         public string[] Dependencies => new string[0]; // 如果依赖其他模块，在这里指定
 
         // UI相关
         public bool HasUI => true; // 如果模块有UI界面，设为true
-        
+
         // 生命周期方法
         public void Initialize()
         {
             // 初始化代码
         }
-        
+
         public void Start()
         {
             // 启动模块功能
         }
-        
+
         public void Stop()
         {
             // 停止模块，清理资源
         }
-        
+
         public void ShowWindow()
         {
             // 显示模块的UI界面
@@ -145,7 +136,7 @@ namespace YourNamespace
 2. **正确处理异常**：在模块代码中妥善处理异常，避免影响主应用程序。
 3. **资源管理**：在 Stop() 方法中释放所有资源，包括关闭窗口、停止线程等。
 4. **依赖管理**：明确声明模块的依赖关系，避免循环依赖。
-5. **UI设计**：如有UI界面，确保风格与主应用程序一致。
+5. **UI设计**：如有UI界面，建议风格与主应用程序一致。
 
 ---
 
@@ -160,10 +151,6 @@ namespace YourNamespace
 ### Q: 我的模块没有被加载怎么办？
 
 A: 确保 .dll 文件放在正确的目录中，并且包含实现了 IExtensionModule 接口的公共类。
-
-### Q: 如何在模块中访问主应用程序的功能？
-
-A: 可以通过依赖注入或服务定位器模式来访问主应用程序提供的服务。
 
 ### Q: 模块可以有多个窗口吗？
 
