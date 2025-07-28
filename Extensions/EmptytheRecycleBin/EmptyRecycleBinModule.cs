@@ -23,7 +23,7 @@ namespace EmptytheRecycleBin
         /// </summary>
         /// <param name="message">消息内容</param>
         /// <param name="type">消息类型</param>
-        private static void ShowToast(string message, string type)
+        private static void ShowToast(string message, ToastType type)
         {
             Task.Delay(100).ContinueWith(_ =>
             {
@@ -60,20 +60,20 @@ namespace EmptytheRecycleBin
             {
                 bool success = EmptyRecycleBin();
                 string message = success ? "回收站清空成功" : "回收站清空失败";
-                string type = success ? "Success" : "Error";
+                ToastType type = success ? ToastType.Success : ToastType.Error;
                 ShowToast(message, type);
             }
             catch (UnauthorizedAccessException ex)
             {
-                ShowToast($"权限不足：{ex.Message}", "Error");
+                ShowToast($"权限不足：{ex.Message}", ToastType.Error);
             }
             catch (InvalidOperationException ex)
             {
-                ShowToast($"操作失败：{ex.Message}", "Error");
+                ShowToast($"操作失败：{ex.Message}", ToastType.Error);
             }
             catch (Exception ex)
             {
-                ShowToast($"回收站清空失败：{ex.Message}", "Error");
+                ShowToast($"回收站清空失败：{ex.Message}", ToastType.Error);
             }
         }
 

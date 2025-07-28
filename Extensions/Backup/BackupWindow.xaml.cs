@@ -67,7 +67,7 @@ namespace Backup
                     string fileCopyPath = Path.Combine(extDir, "FileCopy.dll"); // 检查FileCopy.dll是否存在
                     if (!File.Exists(fileCopyPath))
                     {
-                        ShowToast($"找不到FileCopy.dll文件: {fileCopyPath}", "Error");
+                        ShowToast($"找不到FileCopy.dll文件: {fileCopyPath}", ToastType.Error);
                         return;
                     }
                     bool result = SetDllDirectory(extDir); // 设置 DLL 搜索目录
@@ -75,7 +75,7 @@ namespace Backup
             }
             catch (Exception ex)
             {
-                ShowToast($"初始化DLL时出错: {ex.Message}", "Error");
+                ShowToast($"初始化DLL时出错: {ex.Message}", ToastType.Error);
             }
         }
 
@@ -198,7 +198,7 @@ namespace Backup
             }
             catch (Exception ex)
             {
-                ShowToast($"备份失败: {ex.Message}", "Error"); // 显示备份失败通知
+                ShowToast($"备份失败: {ex.Message}", ToastType.Error); // 显示备份失败通知
             }
             finally
             {
@@ -242,7 +242,7 @@ namespace Backup
         // 完成备份操作
         private void CompleteBackup()
         {
-            ShowToast("备份完成！", "Success"); // 显示备份完成通知
+            ShowToast("备份完成！", ToastType.Success); // 显示备份完成通知
             TipLabel.Content = "备份完成！"; // 设置提示标签内容
             BackupButton.IsEnabled = true; // 启用备份按钮
             
@@ -254,7 +254,7 @@ namespace Backup
 
         // 显示Toast通知
         [SupportedOSPlatform("windows")]
-        private static void ShowToast(string message, string type)
+        private static void ShowToast(string message, ToastType type)
         {
             using var toast = new ToastManager(); // 创建Toast管理器
             toast.Show(message, type); // 显示Toast通知
@@ -281,7 +281,7 @@ namespace Backup
             catch (Exception ex)
             {
                 Dispatcher.Invoke(() =>
-                    ShowToast($"备份文件 {file.FileName} 失败: {ex.Message}", "Error")
+                    ShowToast($"备份文件 {file.FileName} 失败: {ex.Message}", ToastType.Error)
                 );
             }
         }
