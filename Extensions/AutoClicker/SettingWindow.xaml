@@ -6,13 +6,14 @@
     xmlns:local="clr-namespace:AutoClicker"
     x:Class="AutoClicker.SettingWindow"
     mc:Ignorable="d"
-        
+
     WindowStartupLocation="CenterOwner"
     ResizeMode="NoResize"
     Title="连点器-设置"
     Topmost="True"
     Height="450"
-    Width="800">
+    Width="800"
+>
     <Grid>
         
     </Grid>

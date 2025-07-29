@@ -5,11 +5,13 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Authors>Anonymity</Authors>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Quicker\Quicker.csproj" />
-    <ProjectReference Include="..\..\Quicker\Quicker.csproj" />
+    <Reference Include="Quicker">
+      <HintPath>..\..\..\Quicker\bin\Debug\net8.0-windows10.0.17763.0\Quicker.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

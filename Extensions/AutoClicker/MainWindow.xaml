@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:Connector"
     x:Class="Connector.MainWindow"
     mc:Ignorable="d"
-    
+
     WindowStartupLocation="CenterScreen"
     AllowsTransparency="True"
     Background="{x:Null}"
@@ -22,10 +22,36 @@
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/TextBoxStyles.xaml"/>
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/ComboBoxStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="TitleButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Height" Value="23"/>
+                <Setter Property="Width" Value="23"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#EAEAEA"/>
+                    </Trigger>
+                    <Trigger Property="IsPressed" Value="True">
+                        <Setter Property="Background" Value="#D0D0D0"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
-    
-    <Border CornerRadius="5" Width="414" Height="308" MouseDown="Border_MouseDown" Margin="30">
+
+    <Border CornerRadius="5" Width="414" Height="308" MouseLeftButtonDown="Border_MouseLeftButtonDown" Margin="30">
         <Grid>
             <!-- 窗口阴影 -->
             <Rectangle Fill="White" Margin="5,7">
@@ -35,13 +61,34 @@
             </Rectangle>
             <Border CornerRadius="5" Background="White" BorderThickness="1" BorderBrush="Gray">
                 <Grid>
-                    <Border CornerRadius="5" Background="#F3F3F3" Margin="0,0,0,283">
+                    <Border x:Name="TitleBorder" CornerRadius="5,5,0,0" Background="#F3F3F3" Margin="0,0,0,283">
                         <Grid>
-                            <Image Source="/Quicker;component/Resources/Images/Quicker1.png" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Height="16" Width="16"/>
+                            <Image Source="/Quicker;component/Resources/Images/Quicker_Enabled.png" Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Height="16" Width="16"/>
                             <TextBlock Text="连点器" Margin="31,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button x:Name="OpenSettingWindow" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenSettingWindow_Click" Margin="263,0,0,0"/>
-                            <Button x:Name="MinimumButton" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Center" Click="MinimumButton_Click" Margin="311,0,0,0"/>
-                            <Button x:Name="CloseButton" Content="Button" HorizontalAlignment="Left" VerticalAlignment="Center" Click="CloseButton_Click" Margin="359,0,0,0"/>
+                            <Button x:Name="OpenSettingWindow" Style="{StaticResource TitleButtonStyle}" ToolTip="软件设置" VerticalAlignment="Center" Click="OpenSettingWindow_Click" Margin="302,0,0,0" Width="60" Height="23">
+                                <Grid Width="{Binding ElementName=TitleBorder, Path=ActualWidth, Mode=OneWay}">
+                                    <Rectangle Width="16" Height="16" Fill="#A1A1A1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="/Quicker;component/Resources/Images/SettingWindow.png"/>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Text="设置" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="26,0,0,0"/>
+                                </Grid>
+                            </Button>
+                            <Button x:Name="MinimumButton" Style="{StaticResource TitleButtonStyle}" ToolTip="最小化" HorizontalAlignment="Left" VerticalAlignment="Center" Click="MinimumButton_Click" Margin="364,0,0,0" Width="23" Height="23">
+                                <Rectangle Width="20" Height="20" Fill="#A1A1A1">
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush/>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
+                            <Button x:Name="CloseButton" Style="{StaticResource TitleButtonStyle}" ToolTip="关闭" HorizontalAlignment="Left" VerticalAlignment="Top" Click="CloseButton_Click" Margin="389,0,0,0" Width="23" Height="23">
+                                <Rectangle Width="20" Height="20" Fill="#A1A1A1">
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush ImageSource="/Quicker;component/Resources/Images/CloseWindow.png"/>
+                                    </Rectangle.OpacityMask>
+                                </Rectangle>
+                            </Button>
                         </Grid>
                     </Border>
                     <Label Content="点击类型" Margin="69,76,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
@@ -51,7 +98,7 @@
                     <TextBox Style="{StaticResource RoundedTextBox}" HorizontalAlignment="Left" Margin="182,131,0,0" VerticalAlignment="Top" Width="120" ToolTip="更多间隔时间可自定义"/>
                     <Label Content="秒" HorizontalAlignment="Left" Margin="330,129,0,0" VerticalAlignment="Top"/>
                     <Label Content="启动和停止的热键" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="60,174,0,0"/>
-                    <ComboBox HorizontalAlignment="Left" Margin="182,176,0,0" VerticalAlignment="Top" Width="120">
+                    <ComboBox HorizontalAlignment="Left" ToolTip="更多热键可自定义" Margin="182,176,0,0" VerticalAlignment="Top" Width="120">
                         <ComboBoxItem>
                             <TextBlock Text="F1" Margin="5,0"/>
                         </ComboBoxItem>
