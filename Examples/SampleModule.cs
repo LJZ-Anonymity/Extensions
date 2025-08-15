@@ -1,6 +1,4 @@
-using System.Windows.Forms;
-using Quicker.Interface;
-using System;
+using Quicker.Extend;
 
 namespace Quicker.Examples
 {

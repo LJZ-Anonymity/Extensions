@@ -1,6 +1,8 @@
 using System.Runtime.InteropServices;
+using System.Reflection;
 using Quicker.Managers;
 using Quicker.Extend;
+using System.IO;
 
 namespace EmptytheRecycleBin
 {
@@ -41,12 +43,29 @@ namespace EmptytheRecycleBin
         public string Version => "1.0.0";
         public string Author => "Anonymity";
         public string Description => "提供清空回收站功能";
+        public byte[] IconData => GetIconData();
 
         // UI相关
         public bool HasUI => false;
 
         // 依赖关系
         public string[] Dependencies => [];
+
+        public bool HasContextMenu => false;
+
+        /// <summary>
+        /// 获取图标字节数组
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"> 图标资源未找到 </exception>
+        private static byte[] GetIconData()
+        {
+            string resourceName = "icon.ico";
+            using Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException("图标资源未找到", resourceName);
+            byte[] iconData = new byte[stream.Length];
+            stream.Read(iconData, 0, iconData.Length);
+            return iconData;
+        }
 
         // 生命周期方法
         public void Initialize()
