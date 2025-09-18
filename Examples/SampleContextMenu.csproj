@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Authors>Quicker Team</Authors>
+    <AssemblyName>SampleContextMenu</AssemblyName>
+    <RootNamespace>Quicker.Examples</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 如果有图标文件，可以这样嵌入 -->
+    <!--
+    <None Remove="icon.ico" />
+    <EmbeddedResource Include="icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Quicker">
+      <HintPath>..\..\Quicker\bin\Debug\net8.0-windows10.0.17763.0\Quicker.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
