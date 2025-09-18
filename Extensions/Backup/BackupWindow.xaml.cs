@@ -2,6 +2,7 @@
 using System.Runtime.Versioning;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Reflection;
 using Quicker.Managers;
 using Quicker.Extend;
 using System.Windows;
@@ -15,7 +16,9 @@ namespace Backup
         public string Version => "1.0.0"; // 版本
         public string Author => "Anonymity"; // 作者
         public string Description => "备份文件的扩展模块"; // 描述信息
+        public byte[] IconData => GetIconData(); // 扩展图标
         public bool HasUI => true; // 是否有UI
+        public bool HasContextMenu => false; // 是否具有右键菜单
         public string[] Dependencies => []; // 依赖模块
 
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
@@ -53,6 +56,34 @@ namespace Backup
         {
             Show(); // 显示窗口
             Activate(); // 激活窗口
+        }
+
+        /// <summary>
+        /// 获取图标字节数组
+        /// </summary>
+        /// <returns>图标数据</returns>
+        private static byte[] GetIconData()
+        {
+            try
+            {
+                // 从嵌入资源中读取图标
+                Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Backup.icon.ico");
+                if (stream != null)
+                {
+                    using (stream)
+                    {
+                        byte[] iconData = new byte[stream.Length];
+                        stream.Read(iconData, 0, iconData.Length);
+                        return iconData;
+                    }
+                }
+
+                return []; // 如果找不到资源，返回空数组
+            }
+            catch
+            {
+                return [];
+            }
         }
 
         public BackupWindow()

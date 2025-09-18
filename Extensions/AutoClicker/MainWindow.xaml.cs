@@ -1,9 +1,11 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Input;
+using System.Reflection;
 using Quicker.Extend;
 using System.Windows;
 using AutoClicker;
+using System.IO;
 
 namespace Connector
 {
@@ -13,7 +15,9 @@ namespace Connector
         public string Version => "1.0.0"; // 版本号
         public string Author => "Anonymity"; // 作者
         public string Description => "连点器"; // 描述
+        public byte[] IconData => GetIconData(); // 扩展图标
         public bool HasUI => true; // 窗口有UI
+        public bool HasContextMenu => false; // 是否具有右键菜单
         public string[] Dependencies => []; // 依赖项
 
         public void Initialize()
@@ -38,6 +42,34 @@ namespace Connector
         public void Stop()
         {
 
+        }
+
+        /// <summary>
+        /// 获取图标字节数组
+        /// </summary>
+        /// <returns>图标数据</returns>
+        private static byte[] GetIconData()
+        {
+            try
+            {
+                // 从嵌入资源中读取图标
+                Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AutoClicker.icon.ico");
+                if (stream != null)
+                {
+                    using (stream)
+                    {
+                        byte[] iconData = new byte[stream.Length];
+                        stream.Read(iconData, 0, iconData.Length);
+                        return iconData;
+                    }
+                }
+
+                return []; // 如果找不到资源，返回空数组
+            }
+            catch
+            {
+                return [];
+            }
         }
 
         /// <summary>

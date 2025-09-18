@@ -58,8 +58,7 @@
 ### 步骤 3: 实现 IExtensionModule 接口
 
 ```csharp
-using Quicker.Interface;
-using System;
+using Quicker.Extend;
 
 namespace YourNamespace
 {
@@ -108,7 +107,7 @@ namespace YourNamespace
 
 ### 步骤 5: 部署模块
 
-在本地 `C:\Users\LENOVO\AppData\Roaming\Anonymity\Quicker\Extensions` 路径下为模块创建一个新的文件夹，将生成的 .dll 文件复制到该文件夹中。
+在本地应用程序数据根目录下为模块创建一个新的文件夹，将生成的 .dll 文件复制到该文件夹中。
 
 ---
 
