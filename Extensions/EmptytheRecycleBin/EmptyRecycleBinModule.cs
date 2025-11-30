@@ -27,14 +27,11 @@ namespace EmptytheRecycleBin
         /// <param name="type">消息类型</param>
         private static void ShowToast(string message, ToastType type)
         {
-            Task.Delay(100).ContinueWith(_ =>
+            Task.Run(async () =>
             {
-                try
-                {
-                    using var toast = new ToastManager();
-                    toast.Show(message, type);
-                }
-                catch { }
+                await Task.Delay(100);
+                using var toast = new ToastManager();
+                toast.Show(message, type);
             });
         }
 
@@ -47,10 +44,6 @@ namespace EmptytheRecycleBin
 
         // UI相关
         public bool HasUI => false;
-
-        // 依赖关系
-        public string[] Dependencies => [];
-
         public bool HasContextMenu => false;
 
         /// <summary>
@@ -59,26 +52,18 @@ namespace EmptytheRecycleBin
         /// <returns>图标数据</returns>
         private static byte[] GetIconData()
         {
-            try
+            // 从嵌入资源中读取图标
+            Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("EmptytheRecycleBin.icon.ico");
+            if (stream != null)
             {
-                // 从嵌入资源中读取图标
-                Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("EmptytheRecycleBin.icon.ico");
-                if (stream != null)
+                using (stream)
                 {
-                    using (stream)
-                    {
-                        byte[] iconData = new byte[stream.Length];
-                        stream.Read(iconData, 0, iconData.Length);
-                        return iconData;
-                    }
+                    byte[] iconData = new byte[stream.Length];
+                    stream.Read(iconData, 0, iconData.Length);
+                    return iconData;
                 }
-
-                return []; // 如果找不到资源，返回空数组
             }
-            catch
-            {
-                return [];
-            }
+            return []; // 如果找不到资源，返回空数组
         }
 
         // 生命周期方法
@@ -120,53 +105,41 @@ namespace EmptytheRecycleBin
             // 由于HasUI为false，此方法可以为空
         }
 
+        private const int ERROR_INVALID_PARAMETER = unchecked((int)0x80070057); // 无效参数
+        private const int ERROR_ACCESS_DENIED = unchecked((int)0x80070005);     // 访问被拒绝
+        private const int ERROR_FILE_NOT_FOUND = unchecked((int)0x80070002);    // 文件未找到
+        private const int E_UNEXPECTED = unchecked((int)0x8000FFFF);            // 未预期的错误
+        private const int ERROR_NOT_READY = unchecked((int)0x80070015);         // 未就绪
+
         /// <summary>
         /// 清空回收站的异步核心方法
         /// </summary>
-        /// <returns></returns>
+        /// <returns> 清空是否成功</returns>
         public static async Task<bool> EmptyRecycleBinAsync()
         {
             return await Task.Run(() =>
             {
                 try
                 {
-                    uint flags = SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND; // 调用Windows API
-                    int result = SHEmptyRecycleBin(IntPtr.Zero, null, flags);
-                    if (result == 0) // S_OK
+                    uint flags = SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND; // 设置清空回收站的标志
+                    int result = SHEmptyRecycleBin(IntPtr.Zero, null, flags); // 调用Windows API清空回收站
+                    if (result == 0)
                     {
-                        int iconResult = SHUpdateRecycleBinIcon(); // 更新回收站图标并检查返回值
+                        _ = SHUpdateRecycleBinIcon();
                         return true;
                     }
-                    else
+
+                    return result switch
                     {
-                        return result switch // 检查特定的错误代码
-                        {
-                            // ERROR_INVALID_PARAMETER
-                            unchecked((int)0x80070057) => throw new InvalidOperationException("参数无效"),
-                            // ERROR_ACCESS_DENIED
-                            unchecked((int)0x80070005) => throw new UnauthorizedAccessException("访问被拒绝，请以管理员身份运行"),
-                            // ERROR_FILE_NOT_FOUND
-                            unchecked((int)0x80070002) => true,// 回收站为空或不存在，这实际上是成功的
-                            // E_UNEXPECTED - 通常表示回收站为空
-                            unchecked((int)0x8000FFFF) => true,// 回收站为空，这实际上是成功的
-                            // ERROR_NOT_READY
-                            unchecked((int)0x80070015) => throw new InvalidOperationException("回收站不可用"),
-                            _ => throw new InvalidOperationException($"清空回收站失败，错误代码: 0x{result:X8}"),
-                        };
-                    }
+                        ERROR_INVALID_PARAMETER => throw new InvalidOperationException("参数无效"),
+                        ERROR_ACCESS_DENIED => throw new UnauthorizedAccessException("访问被拒绝，请以管理员身份运行"),
+                        ERROR_FILE_NOT_FOUND => true,
+                        E_UNEXPECTED => true,
+                        ERROR_NOT_READY => throw new InvalidOperationException("回收站不可用"),
+                        _ => throw new InvalidOperationException($"清空回收站失败，错误代码: 0x{result:X8}")
+                    };
                 }
-                catch (InvalidOperationException)
-                {
-                    throw; // 重新抛出业务逻辑异常
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    throw; // 重新抛出权限异常
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"清空回收站时发生未知错误: {ex.Message}");
-                }
+                catch{ throw; }
             });
         }
     }

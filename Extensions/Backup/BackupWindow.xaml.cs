@@ -64,26 +64,18 @@ namespace Backup
         /// <returns>图标数据</returns>
         private static byte[] GetIconData()
         {
-            try
+            // 从嵌入资源中读取图标
+            Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Backup.icon.ico");
+            if (stream != null)
             {
-                // 从嵌入资源中读取图标
-                Stream? stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Backup.icon.ico");
-                if (stream != null)
+                using (stream)
                 {
-                    using (stream)
-                    {
-                        byte[] iconData = new byte[stream.Length];
-                        stream.Read(iconData, 0, iconData.Length);
-                        return iconData;
-                    }
+                    byte[] iconData = new byte[stream.Length];
+                    stream.Read(iconData, 0, iconData.Length);
+                    return iconData;
                 }
-
-                return []; // 如果找不到资源，返回空数组
             }
-            catch
-            {
-                return [];
-            }
+            return []; // 如果找不到资源，返回空数组
         }
 
         public BackupWindow()
