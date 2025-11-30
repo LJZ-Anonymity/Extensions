@@ -16,32 +16,14 @@ namespace Connector
         public string Author => "Anonymity"; // 作者
         public string Description => "连点器"; // 描述
         public byte[] IconData => GetIconData(); // 扩展图标
-        public bool HasUI => true; // 窗口有UI
         public bool HasContextMenu => false; // 是否具有右键菜单
-        public string[] Dependencies => []; // 依赖项
 
-        public void Initialize()
+        void IExtensionModule.Activate()
         {
             InitializeComponent();
             ApplyClipping(); // 应用裁剪
             Show(); // 显示窗口
             Activate(); // 激活窗口
-        }
-
-        public void ShowWindow()
-        {
-            Show(); // 显示窗口
-            Activate(); // 激活窗口
-        }
-
-        public void Start()
-        {
-
-        }
-
-        public void Stop()
-        {
-
         }
 
         /// <summary>
@@ -80,10 +62,8 @@ namespace Connector
             // 找到需要裁剪的Border元素
             if (this.FindName("TitleBorder") is Border titleBorder)
             {
-                // 监听尺寸变化事件
-                titleBorder.SizeChanged += (sender, e) => UpdateBorderClip(titleBorder);
-                // 初始应用裁剪
-                UpdateBorderClip(titleBorder);
+                titleBorder.SizeChanged += (sender, e) => UpdateBorderClip(titleBorder); // 监听尺寸变化事件
+                UpdateBorderClip(titleBorder); // 初始应用裁剪
             }
         }
 
@@ -91,7 +71,7 @@ namespace Connector
         /// 更新Border的裁剪路径
         /// </summary>
         /// <param name="border">需要裁剪的Border</param>
-        private void UpdateBorderClip(Border border)
+        private static void UpdateBorderClip(Border border)
         {
             double width = border.ActualWidth;
             double height = border.ActualHeight;
@@ -186,6 +166,11 @@ namespace Connector
         {
             SettingWindow settingWindow = new() { Owner = this }; // 创建设置窗口
             settingWindow.ShowDialog(); // 显示设置窗口
+        }
+
+        public void Deactivate()
+        {
+
         }
     }
 }

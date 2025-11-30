@@ -8,6 +8,14 @@ namespace EmptytheRecycleBin
 {
     public partial class EmptyRecycleBinModule : IExtensionModule
     {
+        // 模块元数据
+        public string Name => "EmptyRecycleBin";
+        public string Version => "1.0.0";
+        public string Author => "Anonymity";
+        public string Description => "提供清空回收站功能";
+        public byte[] IconData => GetIconData();
+        public bool HasContextMenu => false;
+
         // Windows API 声明 - 使用传统的DllImportAttribute确保兼容性
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
         private static extern int SHEmptyRecycleBin(IntPtr hwnd, string? pszRootPath, uint dwFlags);
@@ -15,10 +23,17 @@ namespace EmptytheRecycleBin
         [DllImport("shell32.dll")]
         private static extern int SHUpdateRecycleBinIcon();
 
-        // 常量定义
-        private const uint SHERB_NOCONFIRMATION = 0x00000001;
-        private const uint SHERB_NOPROGRESSUI = 0x00000002;
-        private const uint SHERB_NOSOUND = 0x00000004;
+        // 回收站操作标志常量
+        private const uint SHERB_NOCONFIRMATION = 0x00000001; // 不显示确认对话框
+        private const uint SHERB_NOPROGRESSUI = 0x00000002;   // 不显示进度对话框
+        private const uint SHERB_NOSOUND = 0x00000004;        // 不播放声音
+
+        // 系统错误码常量
+        private const int ERROR_INVALID_PARAMETER = unchecked((int)0x80070057); // 无效参数
+        private const int ERROR_ACCESS_DENIED = unchecked((int)0x80070005);     // 访问被拒绝
+        private const int ERROR_FILE_NOT_FOUND = unchecked((int)0x80070002);    // 文件未找到
+        private const int E_UNEXPECTED = unchecked((int)0x8000FFFF);            // 未预期的错误
+        private const int ERROR_NOT_READY = unchecked((int)0x80070015);         // 未就绪
 
         /// <summary>
         /// 显示Toast消息
@@ -34,17 +49,6 @@ namespace EmptytheRecycleBin
                 toast.Show(message, type);
             });
         }
-
-        // 模块元数据
-        public string Name => "EmptyRecycleBin";
-        public string Version => "1.0.0";
-        public string Author => "Anonymity";
-        public string Description => "提供清空回收站功能";
-        public byte[] IconData => GetIconData();
-
-        // UI相关
-        public bool HasUI => false;
-        public bool HasContextMenu => false;
 
         /// <summary>
         /// 获取图标字节数组
@@ -66,13 +70,7 @@ namespace EmptytheRecycleBin
             return []; // 如果找不到资源，返回空数组
         }
 
-        // 生命周期方法
-        public void Initialize()
-        {
-
-        }
-
-        public async void Start()
+        public async void Activate()
         {
             try
             {
@@ -94,22 +92,6 @@ namespace EmptytheRecycleBin
                 ShowToast($"回收站清空失败：{ex.Message}", ToastType.Error);
             }
         }
-
-        public void Stop()
-        {
-
-        }
-
-        public void ShowWindow()
-        {
-            // 由于HasUI为false，此方法可以为空
-        }
-
-        private const int ERROR_INVALID_PARAMETER = unchecked((int)0x80070057); // 无效参数
-        private const int ERROR_ACCESS_DENIED = unchecked((int)0x80070005);     // 访问被拒绝
-        private const int ERROR_FILE_NOT_FOUND = unchecked((int)0x80070002);    // 文件未找到
-        private const int E_UNEXPECTED = unchecked((int)0x8000FFFF);            // 未预期的错误
-        private const int ERROR_NOT_READY = unchecked((int)0x80070015);         // 未就绪
 
         /// <summary>
         /// 清空回收站的异步核心方法
@@ -141,6 +123,11 @@ namespace EmptytheRecycleBin
                 }
                 catch{ throw; }
             });
+        }
+
+        public void Deactivate()
+        {
+
         }
     }
 }

@@ -3,16 +3,27 @@ using System.Windows.Media;
 using System.Text.Json;
 using System.Net.Http;
 using System.Windows;
+using Quicker.Extend;
 using System.Text;
 using Markdig;
 
 namespace Quicker.Windows.ToolWindows
 {
-    public partial class AIWindow : Window
+    public partial class AIWindow : Window, IExtensionModule
     {
         private const string _apiKey = "sk-SYIeraiqBBd4hxdNurZ4ZHO2wHitczSeyJa29ifGL8glbgWg";
         private const string _apiUrl = "https://api.moonshot.cn/v1/chat/completions";
         private readonly HttpClient _httpClient = new();
+
+        public string Version => "1.0.0";
+
+        public string Author => "Anonymity";
+
+        public byte[] IconData => throw new NotImplementedException();
+
+        public string Description => throw new NotImplementedException();
+
+        public bool HasContextMenu => false;
 
         public AIWindow()
         {
@@ -121,11 +132,13 @@ namespace Quicker.Windows.ToolWindows
             // 这里我们简化处理，将HTML转换为纯文本并保持基本格式
             var plainText = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]*>", "");
             plainText = plainText.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
-            
+
             // 创建新的段落
-            var paragraph = new Paragraph();
-            paragraph.Margin = new Thickness(0, 5, 0, 5);
-            
+            var paragraph = new Paragraph
+            {
+                Margin = new Thickness(0, 5, 0, 5)
+            };
+
             // 处理基本的Markdown格式
             var lines = plainText.Split('\n');
             foreach (var line in lines)
@@ -179,6 +192,16 @@ namespace Quicker.Windows.ToolWindows
         {
             _httpClient?.Dispose();
             base.OnClosed(e);
+        }
+
+        void IExtensionModule.Activate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Deactivate()
+        {
+            throw new NotImplementedException();
         }
     }
 }

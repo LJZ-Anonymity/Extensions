@@ -17,9 +17,7 @@ namespace Backup
         public string Author => "Anonymity"; // 作者
         public string Description => "备份文件的扩展模块"; // 描述信息
         public byte[] IconData => GetIconData(); // 扩展图标
-        public bool HasUI => true; // 是否有UI
         public bool HasContextMenu => false; // 是否具有右键菜单
-        public string[] Dependencies => []; // 依赖模块
 
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
         private readonly FilesDatabase db = new(); // 文件数据库
@@ -36,26 +34,14 @@ namespace Backup
         [return: MarshalAs(UnmanagedType.Bool)]
         public static partial bool SetDllDirectory([MarshalAs(UnmanagedType.LPWStr)] string lpPathName); // 设置 DLL 搜索目录
 
-        public void Start()
+        void IExtensionModule.Activate()
         {
             Refresh(); // 加载初始数据
             if (Visibility != Visibility.Visible)
             {
-                ShowWindow(); // 显示窗口
+                Show(); // 显示窗口
+                Activate(); // 激活窗口
             }
-        }
-
-        // 实现 IExtensionModule 接口的 Initialize 方法
-        public void Initialize()
-        {
-            ShowWindow(); // 显示窗口
-        }
-
-        // 实现 IExtensionModule 接口的 ShowWindow 方法
-        public void ShowWindow()
-        {
-            Show(); // 显示窗口
-            Activate(); // 激活窗口
         }
 
         /// <summary>
@@ -84,7 +70,6 @@ namespace Backup
             try
             {
                 string? extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location);
-                System.Diagnostics.Debug.WriteLine($"扩展目录: {extDir}");
                 if (!string.IsNullOrEmpty(extDir))
                 {
                     string fileCopyPath = Path.Combine(extDir, "FileCopy.dll"); // 检查FileCopy.dll是否存在
@@ -431,8 +416,8 @@ namespace Backup
             }
         }
 
-        // 停止模块
-        public void Stop()
+        // 卸载模块
+        void IExtensionModule.Deactivate()
         {
             if (this.IsVisible) // 如果窗口可见
             {
