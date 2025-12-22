@@ -1,33 +1,32 @@
-﻿using System.Windows.Documents;
-using System.Windows.Media;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Net.Http;
-using System.Windows;
 using Quicker.Extend;
+using System.Windows;
 using System.Text;
-using Markdig;
 
-namespace Quicker.Windows.ToolWindows
+namespace AIHelper
 {
     public partial class AIWindow : Window, IExtensionModule
     {
         private const string _apiKey = "sk-SYIeraiqBBd4hxdNurZ4ZHO2wHitczSeyJa29ifGL8glbgWg";
         private const string _apiUrl = "https://api.moonshot.cn/v1/chat/completions";
+        private readonly MarkdownRenderer _markdownRenderer;
         private readonly HttpClient _httpClient = new();
 
         public string Version => "1.0.0";
 
         public string Author => "Anonymity";
 
-        public byte[] IconData => throw new NotImplementedException();
+        public byte[] IconData => [];
 
-        public string Description => throw new NotImplementedException();
+        public string Description => "";
 
         public bool HasContextMenu => false;
 
         public AIWindow()
         {
             InitializeComponent();
+            _markdownRenderer = new MarkdownRenderer(ResponseDocument);
         }
 
         /// <summary>
@@ -116,76 +115,8 @@ namespace Quicker.Windows.ToolWindows
         {
             Dispatcher.Invoke(() =>
             {
-                // 解析Markdown并添加到文档
-                var markdownHtml = Markdown.ToHtml(text);
-                AppendMarkdownToDocument(markdownHtml);
+                _markdownRenderer.AppendMarkdown(text);
             });
-        }
-
-        /// <summary>
-        /// 将Markdown HTML添加到文档中
-        /// </summary>
-        /// <param name="html">HTML内容</param>
-        private void AppendMarkdownToDocument(string html)
-        {
-            // 简单的HTML到WPF FlowDocument转换
-            // 这里我们简化处理，将HTML转换为纯文本并保持基本格式
-            var plainText = System.Text.RegularExpressions.Regex.Replace(html, "<[^>]*>", "");
-            plainText = plainText.Replace("&lt;", "<").Replace("&gt;", ">").Replace("&amp;", "&");
-
-            // 创建新的段落
-            var paragraph = new Paragraph
-            {
-                Margin = new Thickness(0, 5, 0, 5)
-            };
-
-            // 处理基本的Markdown格式
-            var lines = plainText.Split('\n');
-            foreach (var line in lines)
-            {
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    paragraph.Inlines.Add(new LineBreak());
-                    continue;
-                }
-                
-                var run = new Run(line);
-                
-                // 简单的格式检测
-                if (line.StartsWith("# "))
-                {
-                    run.FontSize = 18;
-                    run.FontWeight = FontWeights.Bold;
-                }
-                else if (line.StartsWith("## "))
-                {
-                    run.FontSize = 16;
-                    run.FontWeight = FontWeights.Bold;
-                }
-                else if (line.StartsWith("### "))
-                {
-                    run.FontSize = 14;
-                    run.FontWeight = FontWeights.Bold;
-                }
-                else if (line.StartsWith("**") && line.EndsWith("**"))
-                {
-                    run.FontWeight = FontWeights.Bold;
-                }
-                else if (line.StartsWith("*") && line.EndsWith("*"))
-                {
-                    run.FontStyle = FontStyles.Italic;
-                }
-                else if (line.StartsWith("`") && line.EndsWith("`"))
-                {
-                    run.Background = new SolidColorBrush(Color.FromRgb(240, 240, 240));
-                    run.FontFamily = new FontFamily("Consolas");
-                }
-                
-                paragraph.Inlines.Add(run);
-                paragraph.Inlines.Add(new LineBreak());
-            }
-            
-            ResponseDocument.Blocks.Add(paragraph);
         }
 
         protected override void OnClosed(EventArgs e)
@@ -196,12 +127,12 @@ namespace Quicker.Windows.ToolWindows
 
         void IExtensionModule.Activate()
         {
-            throw new NotImplementedException();
+            Show();
         }
 
         public void Deactivate()
         {
-            throw new NotImplementedException();
+
         }
     }
 }
