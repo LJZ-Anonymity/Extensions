@@ -35,7 +35,7 @@ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="InputTextBox" Grid.Column="0" Height="30" Margin="0,0,10,0" VerticalContentAlignment="Center" Padding="5" Text="请输入您的问题..." GotFocus="InputTextBox_GotFocus"/>
+            <TextBox x:Name="InputTextBox" Grid.Column="0" Height="30" Margin="0,0,10,0" VerticalContentAlignment="Center" Padding="5" Text="请输入您的问题..." GotFocus="InputTextBox_GotFocus" TextWrapping="Wrap" AcceptsReturn="True" KeyDown="InputTextBox_KeyDown"/>
             <Button x:Name="SendButton" Grid.Column="1" Content="发送" Width="80" Height="30" Click="SendButton_Click"/>
         </Grid>
     </Grid>

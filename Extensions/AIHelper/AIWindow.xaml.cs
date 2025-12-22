@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Windows.Documents;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Text.Json;
 using System.Net.Http;
 using Quicker.Extend;
 using System.Windows;
@@ -8,16 +11,18 @@ namespace AIHelper
 {
     public partial class AIWindow : Window, IExtensionModule
     {
-        private const string _apiKey = "sk-SYIeraiqBBd4hxdNurZ4ZHO2wHitczSeyJa29ifGL8glbgWg";
-        private const string _apiUrl = "https://api.moonshot.cn/v1/chat/completions";
+        private const string _apiKey = "sk-cy3413yv1rpjl54vkcjqkbhdxkza3620e8rmdlopiy3dnnum";
+        private const string _apiUrl = "https://api.xiaomimimo.com/v1/chat/completions";
         private readonly MarkdownRenderer _markdownRenderer;
         private readonly HttpClient _httpClient = new();
+
+        public new string Name => "AI助手";
 
         public string Version => "1.0.0";
 
         public string Author => "Anonymity";
 
-        public byte[] IconData => [];
+        public byte[] IconData => Array.Empty<byte>();
 
         public string Description => "";
 
@@ -48,63 +53,151 @@ namespace AIHelper
                 return;
             }
 
-            // 禁用按钮防止重复点击
             SendButton.IsEnabled = false;
-            InputTextBox.Clear();
+            InputTextBox.Text = "";
+
+            // 1. 显示用户输入：在 **用户：** 后面添加 &nbsp; 确保粗体不溢出
+            string userMessageMarkdown = $"**用户：**&nbsp;\n\n{userInput}\n\n";
+            AppendToResponse(userMessageMarkdown); //
+
+            // 2. 显示“AI 思考中...”占位符 (使用行内粗体格式，避免生成独立的 Block)
+            string thinkingMessage = "**AI：**&nbsp;\n\n思考中...\n\n";
+            AppendToResponse(thinkingMessage);
+
+            // 记录“思考中” Block 的实例 (由于使用了行内格式，这里不需要 Block 实例，但为了兼容后续移除操作，我们保留逻辑)
+            Block thinkingBlockInstance = null;
+
+            Dispatcher.Invoke(() =>
+            {
+                // 获取最后一个添加的 Block 实例，以便在收到回复后移除
+                if (ResponseDocument.Blocks.Count > 0)
+                {
+                    thinkingBlockInstance = ResponseDocument.Blocks.LastBlock;
+                }
+            });
 
             try
             {
-                // 显示用户输入
-                AppendToResponse($"用户: {userInput}\n\n");
-                
-                // 调用Moonshot AI API
-                string aiResponse = await CallMoonshotAPI(userInput);
-                
-                // 显示AI回复
-                AppendToResponse($"AI: {aiResponse}\n\n");
+                // 3. 调用MiMO AI API
+                string aiResponse = await CallMiMOAPI(userInput);
+
+                // 4. 移除 “AI: 思考中...” 的 Block
+                if (thinkingBlockInstance != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        // 使用 Remove(Block element) 方法
+                        ResponseDocument.Blocks.Remove(thinkingBlockInstance);
+                    });
+                }
+
+                // 5. 构造并显示最终的 AI 回复：在 **AI：** 后面添加 &nbsp; 确保粗体不溢出
+                string aiResponseMarkdown = $"{aiResponse}\n\n"; // 【修改点】
+                AppendToResponse(aiResponseMarkdown); //
+
+                // 6. 额外添加一个水平分割线
+                AppendToResponse("---\n\n"); //
             }
             catch (Exception ex)
             {
-                AppendToResponse($"错误: {ex.Message}\n\n");
+                // 如果出错，确保移除“思考中”状态
+                if (thinkingBlockInstance != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        ResponseDocument.Blocks.Remove(thinkingBlockInstance);
+                    });
+                }
+
+                // 显示错误信息
+                AppendToResponse($"**错误:** {ex.Message}\n\n");
             }
             finally
             {
-                // 恢复按钮状态
                 SendButton.IsEnabled = true;
+
+                // 滚动到底部
+                Dispatcher.Invoke(() =>
+                {
+                    ScrollToEnd(ResponseDocumentViewer);
+                });
             }
         }
 
+        // ... (其余方法保持不变)
+
         /// <summary>
-        /// 调用Moonshot AI API
+        /// 修复：获取 FlowDocumentScrollViewer 内部的 ScrollViewer 并滚动到底部。
         /// </summary>
-        /// <param name="userMessage">用户消息</param>
-        /// <returns>AI回复</returns>
-        private async Task<string> CallMoonshotAPI(string userMessage)
+        private void ScrollToEnd(FlowDocumentScrollViewer viewer)
+        {
+            ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(viewer);
+            scrollViewer?.ScrollToEnd();
+        }
+
+        /// <summary>
+        /// 辅助方法：查找指定类型的可视子元素。
+        /// </summary>
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild)
+                {
+                    return typedChild;
+                }
+                else
+                {
+                    T result = FindVisualChild<T>(child);
+                    if (result != null) return result;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 调用MiMO AI API
+        /// </summary>
+        private async Task<string> CallMiMOAPI(string userMessage)
         {
             var requestBody = new
             {
-                model = "moonshot-v1-8k",
+                model = "mimo-v2-flash",
                 messages = new[]
                 {
-                    new { role = "system", content = "你是Kimi，由Moonshot AI提供的人工智能助手，你更擅长中文和英文的对话。你会为用户提供安全、有帮助、准确的回答。" },
+                    new { role = "system", content = $"你是MiMo（中文名称也是MiMo），是小米公司研发的AI智能助手。今天的日期：{DateTime.Today}，你的知识截止日期是2024年12月。" },
                     new { role = "user", content = userMessage }
                 },
-                temperature = 0.6
-            }; // 请求体
+                max_completion_tokens = 1024,
+                temperature = 0.3,
+                top_p = 0.95,
+                stream = false,
+                stop = (string?)null,
+                frequency_penalty = 0,
+                presence_penalty = 0,
+                extra_body = new
+                {
+                    thinking = new
+                    {
+                        type = "disabled"
+                    }
+                }
+            };
 
-            var json = JsonSerializer.Serialize(requestBody); // 序列化请求体
+            var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _httpClient.DefaultRequestHeaders.Clear(); // 清空请求头
+            _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
 
-            var response = await _httpClient.PostAsync(_apiUrl, content); // 发送请求
+            var response = await _httpClient.PostAsync(_apiUrl, content);
             response.EnsureSuccessStatusCode();
 
-            var responseContent = await response.Content.ReadAsStringAsync(); // 读取响应内容
+            var responseContent = await response.Content.ReadAsStringAsync();
             var responseJson = JsonSerializer.Deserialize<JsonElement>(responseContent);
 
-            return responseJson.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString(); // 返回AI回复
+            return responseJson.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "无法获取AI回复";
         }
 
         /// <summary>
@@ -115,6 +208,7 @@ namespace AIHelper
         {
             Dispatcher.Invoke(() =>
             {
+                // 这里调用 MarkdownRenderer
                 _markdownRenderer.AppendMarkdown(text);
             });
         }
@@ -133,6 +227,16 @@ namespace AIHelper
         public void Deactivate()
         {
 
+        }
+
+        private void InputTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                SendButton_Click(sender, e);
+                // FIX: 标记事件已处理，防止 AcceptsReturn="True" 插入换行符
+                e.Handled = true;
+            }
         }
     }
 }
