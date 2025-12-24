@@ -74,8 +74,9 @@ namespace EmptytheRecycleBin
         {
             try
             {
+                ShowToast("开始清空回收站。", ToastType.Common);
                 bool success = await EmptyRecycleBinAsync();
-                string message = success ? "回收站清空成功" : "回收站清空失败";
+                string message = success ? "回收站清空成功！" : "回收站清空失败！";
                 ToastType type = success ? ToastType.Success : ToastType.Error;
                 ShowToast(message, type);
             }
