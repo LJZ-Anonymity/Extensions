@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
+﻿using System.Runtime.Versioning;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Reflection;
@@ -21,18 +20,6 @@ namespace Backup
 
         private readonly List<FilesDatabase.FileData> selectedFiles = []; // 选中的文件
         private readonly FilesDatabase db = new(); // 文件数据库
-
-        // 使用 LibraryImport 特性来声明外部函数，编译时生成更高效的封送代码
-        [LibraryImport("FileCopy.dll", EntryPoint = "CopyFiles")]
-        public static partial void CopyFiles(
-            [MarshalAs(UnmanagedType.LPStr)] string sourcePaths,
-            [MarshalAs(UnmanagedType.LPStr)] string targetPath,
-            [MarshalAs(UnmanagedType.LPStr)] string style,
-            [MarshalAs(UnmanagedType.Bool)] bool cleanTargetFolder); // 文件复制函数
-
-        [LibraryImport("kernel32.dll", SetLastError = true, EntryPoint = "SetDllDirectoryW")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static partial bool SetDllDirectory([MarshalAs(UnmanagedType.LPWStr)] string lpPathName); // 设置 DLL 搜索目录
 
         void IExtensionModule.Activate()
         {
@@ -67,24 +54,6 @@ namespace Backup
         public BackupWindow()
         {
             InitializeComponent(); // 初始化组件
-            try
-            {
-                string? extDir = Path.GetDirectoryName(typeof(BackupWindow).Assembly.Location);
-                if (!string.IsNullOrEmpty(extDir))
-                {
-                    string fileCopyPath = Path.Combine(extDir, "FileCopy.dll"); // 检查FileCopy.dll是否存在
-                    if (!File.Exists(fileCopyPath))
-                    {
-                        ShowToast($"找不到FileCopy.dll文件: {fileCopyPath}", ToastType.Error);
-                        return;
-                    }
-                    bool result = SetDllDirectory(extDir); // 设置 DLL 搜索目录
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowToast($"初始化DLL时出错: {ex.Message}", ToastType.Error);
-            }
         }
 
         // 加载要备份的文件列表
@@ -199,7 +168,7 @@ namespace Backup
             }
 
             PrepareForBackup(); // 准备备份操作
-
+            ShowToast("开始备份。", ToastType.Common); // 显示正在备份通知
             try
             {
                 await BackupFilesAsync(); // 备份选中的文件
@@ -302,6 +271,99 @@ namespace Backup
         private static string PrepareSourcePaths(string sourcePath)
         {
             return string.Join("\n", sourcePath.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)); // 返回源路径字符串
+        }
+
+        /// <summary>
+        /// 复制文件或文件夹
+        /// </summary>
+        /// <param name="sourcePaths">源路径字符串，多行用 \n 分隔</param>
+        /// <param name="targetPath">目标路径</param>
+        /// <param name="style">复制方式："File" 或 "Folder"</param>
+        /// <param name="cleanTargetFolder">是否清理目标文件夹</param>
+        private static void CopyFiles(string sourcePaths, string targetPath, string style, bool cleanTargetFolder)
+        {
+            try
+            {
+                // 如果需要清理目标文件夹，则先删除再创建
+                if (cleanTargetFolder && Directory.Exists(targetPath))
+                {
+                    Directory.Delete(targetPath, true);
+                }
+                Directory.CreateDirectory(targetPath);
+
+                if (style == "File")
+                {
+                    // 复制文件模式
+                    string[] sourceFiles = sourcePaths.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sourceFile in sourceFiles)
+                    {
+                        string trimmedPath = sourceFile.Trim();
+                        if (!string.IsNullOrEmpty(trimmedPath) && File.Exists(trimmedPath))
+                        {
+                            string fileName = Path.GetFileName(trimmedPath);
+                            string destFile = Path.Combine(targetPath, fileName);
+                            File.Copy(trimmedPath, destFile, true); // 覆盖已存在的文件
+                        }
+                    }
+                }
+                else if (style == "Folder")
+                {
+                    // 复制文件夹模式
+                    string[] sourceFolders = sourcePaths.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string sourceFolder in sourceFolders)
+                    {
+                        string trimmedPath = sourceFolder.Trim();
+                        if (!string.IsNullOrEmpty(trimmedPath) && Directory.Exists(trimmedPath))
+                        {
+                            string folderName = Path.GetFileName(trimmedPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                            string targetFolder = Path.Combine(targetPath, folderName);
+                            CopyDirectory(trimmedPath, targetFolder);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowToast($"复制文件或文件夹时出错: {ex.Message}", ToastType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 递归复制文件夹
+        /// </summary>
+        /// <param name="sourceDir">源文件夹路径</param>
+        /// <param name="targetDir">目标文件夹路径</param>
+        private static void CopyDirectory(string sourceDir, string targetDir)
+        {
+            // 创建目标文件夹
+            Directory.CreateDirectory(targetDir);
+
+            // 规范化路径，统一使用 Path.DirectorySeparatorChar
+            string sourceDirNormalized = Path.GetFullPath(sourceDir).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (!sourceDirNormalized.EndsWith(Path.DirectorySeparatorChar))
+            {
+                sourceDirNormalized += Path.DirectorySeparatorChar;
+            }
+
+            // 递归遍历源文件夹
+            foreach (string file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                string fileNormalized = Path.GetFullPath(file);
+                // 计算相对路径
+                string relativePath = fileNormalized[sourceDirNormalized.Length..];
+                // 统一路径分隔符
+                relativePath = relativePath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                string targetFile = Path.Combine(targetDir, relativePath);
+                
+                // 确保目标文件的目录存在
+                string? targetFileDir = Path.GetDirectoryName(targetFile);
+                if (!string.IsNullOrEmpty(targetFileDir))
+                {
+                    Directory.CreateDirectory(targetFileDir);
+                }
+                
+                File.Copy(file, targetFile, true); // 覆盖已存在的文件
+            }
         }
 
         // 删除文件

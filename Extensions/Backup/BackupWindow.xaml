@@ -6,13 +6,13 @@
     xmlns:local="clr-namespace:Backup"
     x:Class="Backup.BackupWindow"
     mc:Ignorable="d"
-    
+
     WindowStartupLocation="CenterScreen"
     Title="请选择要备份的资源"
     ResizeMode="CanMinimize"
     Height="400"
     Width="600"
-    
+
     Loaded="BackupWindow_Loaded"
 >
     <Window.Resources>
@@ -20,7 +20,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/CheckBoxStyle.xaml"/>
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/ButtonStyles.xaml"/>
-                <ResourceDictionary Source="/Quicker;component/Resources/Styles/ScrollBarStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <Style x:Key="FileItemGrid" TargetType="Grid">
