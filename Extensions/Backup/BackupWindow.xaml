@@ -21,7 +21,7 @@
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/CheckBoxStyle.xaml"/>
                 <ResourceDictionary Source="/Quicker;component/Resources/Styles/ButtonStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            
+
             <Style x:Key="FileItemGrid" TargetType="Grid">
                 <Setter Property="Margin" Value="0,5,0,0"/>
                 <Setter Property="Height" Value="24"/>
@@ -34,7 +34,7 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    
+
     <Grid x:Name="MainGrid">
         <Button x:Name="AddButton" Style="{StaticResource WhiteButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="14,10,0,0" VerticalAlignment="Top" Click="AddButton_Click" Content="添加类型"/>
         <Popup x:Name="Popup" PopupAnimation="Fade" Width="117" Height="62" PlacementTarget="{Binding ElementName=AddButton}" Placement="Bottom" AllowsTransparency="True" StaysOpen="False">
@@ -55,7 +55,7 @@
         <Button x:Name="BackupButton" Style="{StaticResource BlueButton}" Height="27" Width="117" HorizontalAlignment="Left" Margin="136,10,0,0" VerticalAlignment="Top" Click="BackupButton_Click" Content="进行备份"/>
         <Label x:Name="TipLabel" Content="备份完成前，请勿关闭窗口" HorizontalAlignment="Left" Margin="258,11,0,0" VerticalAlignment="Top"/>
         <CheckBox x:Name="ExitAfterBackupCheckBox" Content="完成备份后关闭扩展" HorizontalAlignment="Right" Margin="0,16,30,0" VerticalAlignment="Top" IsChecked="True"/>
-        <Border Margin="0,42,0,0" BorderThickness="0,1,0,0" BorderBrush="#FFCCCCCC">
+        <Border x:Name="BackupBorder" Margin="0,42,0,0" BorderThickness="0,1,0,0" BorderBrush="#FFCCCCCC">
             <ScrollViewer x:Name="scrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" ScrollChanged="ListViewScrollViewer_ScrollChanged">
                 <StackPanel x:Name="MainStackPanel"/>
             </ScrollViewer>
@@ -63,5 +63,6 @@
 
         <!-- 垂直滚动条 -->
         <ScrollBar Name="VerticalScrollBar" Orientation="Vertical" Visibility="Collapsed" HorizontalAlignment="Right" ValueChanged="VerticalScrollBar_ValueChanged" Margin="0,42,0,0"/>
+        <ProgressBar x:Name="BackupProgressBar" HorizontalAlignment="Center" Height="10" Margin="0,42,0,0" VerticalAlignment="Top" Width="600" Visibility="Collapsed" Foreground="#FF326CF3"/>
     </Grid>
 </Window>

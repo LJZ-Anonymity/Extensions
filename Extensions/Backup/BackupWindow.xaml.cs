@@ -213,12 +213,26 @@ namespace Backup
         {
             TipLabel.Content = "备份中，请勿关闭窗口"; // 设置提示标签内容
             BackupButton.IsEnabled = false; // 禁用备份按钮
+            MainStackPanel.IsEnabled = false; // 禁用 MainStackPanel，防止备份过程中复选框被点击
+            BackupBorder.Margin = new Thickness(0, 52, 0, 0); // 设置备份边框边距
+
+            // 初始化进度条
+            BackupProgressBar.Maximum = selectedFiles.Count; // 设置最大值为需要备份的文件总数
+            BackupProgressBar.Value = 0; // 重置进度为0
+            BackupProgressBar.Visibility = Visibility.Visible; // 显示进度条
+
             WindowState = WindowState.Minimized; // 最小化窗口
         }
 
         // 完成备份操作
         private void CompleteBackup()
         {
+            // 隐藏进度条
+            BackupProgressBar.Visibility = Visibility.Collapsed;
+            BackupProgressBar.Value = 0; // 重置进度
+
+            MainStackPanel.IsEnabled = true; // 重新启用 MainStackPanel
+            BackupBorder.Margin = new Thickness(0, 42, 0, 0); // 设置备份边框边距
             ShowToast("备份完成！", ToastType.Success); // 显示备份完成通知
             TipLabel.Content = "备份完成！"; // 设置提示标签内容
             BackupButton.IsEnabled = true; // 启用备份按钮
@@ -240,9 +254,17 @@ namespace Backup
         // 备份文件
         private async Task BackupFilesAsync()
         {
+            int completedCount = 0; // 已完成的文件数
             foreach (var file in selectedFiles)
             {
                 await BackupSingleFileAsync(file); // 备份单个文件
+                completedCount++; // 增加已完成计数
+                
+                // 更新进度条
+                Dispatcher.Invoke(() =>
+                {
+                    BackupProgressBar.Value = completedCount; // 更新进度条值
+                });
             }
         }
 
